@@ -1,0 +1,85 @@
+{
+  "routes": [
+    {
+      "pattern": "code|impl|refactor|function",
+      "primary": "Copilot: GPT-5 Codex",
+      "alt": [
+        "GPT-4o",
+        "Grok Code Fast 1"
+      ],
+      "saver": [
+        "o3-mini"
+      ]
+    },
+    {
+      "pattern": "openapi|api|schema|spec",
+      "primary": "ChatGPT Web: GPT-4.1",
+      "alt": [
+        "Copilot: GPT-5 Codex"
+      ],
+      "saver": [
+        "o3-mini"
+      ]
+    },
+    {
+      "pattern": "architecture|design|c4|nfr",
+      "primary": "ChatGPT Web: GPT-5",
+      "alt": [
+        "Gemini 2.5 Pro"
+      ],
+      "saver": [
+        "GPT-4o"
+      ]
+    },
+    {
+      "pattern": "test|qa|unit|e2e|coverage",
+      "primary": "ChatGPT Web: GPT-4.1",
+      "alt": [
+        "Copilot: GPT-5 Codex"
+      ],
+      "saver": [
+        "o4-mini"
+      ]
+    },
+    {
+      "pattern": "deploy|cicd|terraform|iac|release",
+      "primary": "ChatGPT Web: GPT-5",
+      "alt": [
+        "Gemini 2.5 Pro",
+        "Copilot: GPT-5 Codex"
+      ],
+      "saver": [
+        "GPT-4o"
+      ]
+    },
+    {
+      "pattern": "rca|incident|log|monitor|maintenance",
+      "primary": "ChatGPT Web: GPT-4.1",
+      "alt": [
+        "Claude Sonnet 4.5"
+      ],
+      "saver": [
+        "GPT-4o"
+      ]
+    },
+    {
+      "pattern": "retro|pdca|due[- ]diligence|improvement",
+      "primary": "ChatGPT Web: GPT-4.1",
+      "alt": [
+        "Claude Sonnet 4"
+      ],
+      "saver": [
+        "o4-mini"
+      ]
+    }
+  ],
+  "default": {
+    "primary": "ChatGPT Web: GPT-4.1",
+    "alt": [
+      "GPT-4o"
+    ],
+    "saver": [
+      "o4-mini"
+    ]
+  }
+}

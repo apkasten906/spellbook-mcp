@@ -1,0 +1,13 @@
+{
+  "name": "ai-sdlc-mcp",
+  "version": "0.3.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.2.0",
+    "fast-glob": "^3.3.2"
+  }
+}

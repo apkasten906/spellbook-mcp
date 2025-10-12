@@ -1,0 +1,14 @@
+name: Release
+on:
+  push:
+    tags: ["v*.*.*"]
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm -C mcp-starter i --omit=dev
+      - run: zip -r ai-sdlc-promptpack-${{ github.ref_name }}.zip .
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: ai-sdlc-promptpack-${{ github.ref_name }}.zip

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "ai-sdlc": {
+      "command": "node",
+      "args": [
+        "mcp-starter/server.js"
+      ],
+      "env": {}
+    }
+  }
+}

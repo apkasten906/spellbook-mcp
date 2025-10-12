@@ -1,0 +1,6 @@
+FROM node:20-alpine
+WORKDIR /app
+COPY mcp-starter/package.json ./mcp-starter/package.json
+RUN cd mcp-starter && npm i --omit=dev
+COPY . .
+CMD ["node", "mcp-starter/server.js"]
