@@ -8,14 +8,7 @@ import globals from "globals"; // <-- add this (npm i -D globals)
 
 export default [
   {
-    ignores: [
-      "**/node_modules/**",
-      "**/dist/**",
-      "**/*.zip",
-      "docs/**",
-      "prompts/**",
-      ".github/**"
-    ]
+    ignores: ["**/node_modules/**", "**/dist/**", "**/*.zip", "docs/**", "prompts/**", ".github/**"],
   },
   {
     files: ["mcp-starter/**/*.js", "mcp-starter/**/*.mjs"],
@@ -24,13 +17,13 @@ export default [
       sourceType: "module",
       globals: {
         ...globals.node, // <-- enables process, console, etc.
-      }
+      },
     },
     plugins: {
       n,
       "import-x": importX,
       promise,
-      "unused-imports": unused
+      "unused-imports": unused,
     },
     rules: {
       ...js.configs.recommended.rules,
@@ -43,12 +36,13 @@ export default [
       "import-x/first": "warn",
 
       // Optional: order builtins first, then externals, then internals
-      "import-x/order": ["warn", {
-        "groups": [
-          "builtin", "external", "internal", "parent", "sibling", "index", "object", "type"
-        ],
-        "newlines-between": "always"
-      }],
+      "import-x/order": [
+        "warn",
+        {
+          groups: ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"],
+          "newlines-between": "always",
+        },
+      ],
 
       // Promises & cleanups
       "promise/no-return-wrap": "error",
@@ -56,8 +50,8 @@ export default [
       "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": [
         "warn",
-        { args: "after-used", argsIgnorePattern: "^_", varsIgnorePattern: "^_" }
-      ]
-    }
-  }
+        { args: "after-used", argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+    },
+  },
 ];

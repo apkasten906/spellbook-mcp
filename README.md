@@ -5,7 +5,7 @@ A Model Context Protocol server that serves AI prompts as spells — structured,
 Version: **v0.3.0**  
 License: **MIT**
 
-> *Where every prompt is a spell and every build a ritual.*
+> _Where every prompt is a spell and every build a ritual._
 
 A reusable, versioned toolkit of prompts + a lightweight **Model Context Protocol (MCP)** server for AI‑assisted software development. Includes SDLC prompts, PDCA (Deming cycle) meta‑prompts, model routing, and an MCP server exposing everything as tools.
 
@@ -24,9 +24,11 @@ docker run --rm -it spellbook-mcp:0.3.0
 ```
 
 ### MCP Client Setup
+
 Point your MCP-enabled client (Claude desktop, Cursor, VS Code MCP bridge) at **.mcp.json**.
 
 ## Repo Structure
+
 ```
 /
 ├── prompts/
@@ -62,12 +64,15 @@ Point your MCP-enabled client (Claude desktop, Cursor, VS Code MCP bridge) at **
 ```
 
 ## Versioning & Releases
+
 - **SemVer**: MAJOR.MINOR.PATCH
 - Tag releases with `vX.Y.Z`. A GitHub Action creates a release and attaches a zip.
 - See **CONTRIBUTING.md** for branching and PR guidance and **CHANGELOG.md** for history.
 
 ## Model Budgeting
+
 See **PROMPT_EXECUTION_MATRIX.md**. Prefer Copilot (GPT‑5 Codex) for code, use GPT‑4.1/5 for deep reasoning, and fall back to 4o/o3‑mini when acceptable.
 
 ## Commands
+
 See **COMMANDS.md** for slash commands and how they map to MCP tools.
