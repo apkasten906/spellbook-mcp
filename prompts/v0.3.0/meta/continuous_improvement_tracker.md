@@ -6,4 +6,5 @@ backup_model: Claude Sonnet 4.5
 ---
 
 ### Prompt: Improvement Delta Report
+
 > Compare {{release_tag}} vs {{previous_release_tag}} across coverage, quality, docs, learning entries.

@@ -6,6 +6,7 @@ backup_model: GPT-4o
 ---
 
 ### Prompt: Validate branch readiness
+
 > Validate compliance with the SDLC Due Diligence Checklist and produce a merge-readiness summary.
 
 **Checklist:** Test automation, Learnings logged, Cleanup, Documentation, Commit/Push/Merge
@@ -13,6 +14,7 @@ backup_model: GPT-4o
 **Branch Summary:** {{branch_diff}}
 
 **Output (YAML):**
+
 ```yaml
 checklist_results:
   test_automation: pass|fail

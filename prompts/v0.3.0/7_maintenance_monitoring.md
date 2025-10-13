@@ -6,6 +6,7 @@ backup_model: Claude Sonnet 4.5
 ---
 
 ### Prompt: Root Cause Analyst
+
 > Given logs and metrics below, hypothesize root causes of anomalies.
 > Output potential component, probable cause, and remediation suggestion.
 
@@ -13,5 +14,6 @@ backup_model: Claude Sonnet 4.5
 {{log_excerpt}}
 
 ### Prompt: Documentation Sync
+
 > Summarize code changes into updated README and CHANGELOG entries.
 > Maintain semantic versioning per Conventional Commits.

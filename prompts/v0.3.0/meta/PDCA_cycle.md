@@ -6,6 +6,7 @@ backup_model: Claude Sonnet 4
 ---
 
 ### Prompt: Apply the PDCA cycle to this task
+
 > For the given SDLC phase {{phase_name}} and artifact {{artifact_name}},
 > create a PDCA loop with PLAN, DO, CHECK, ACT.
 
@@ -13,6 +14,7 @@ backup_model: Claude Sonnet 4
 {{context_details}}
 
 **Output (YAML):**
+
 ```yaml
 plan: { goals: [], deliverables: [] }
 do: { actions: [] }

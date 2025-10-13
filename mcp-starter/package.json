@@ -1,5 +1,5 @@
 {
-  "name": "ai-sdlc-mcp",
+  "name": "spellbook-mcp",
   "version": "0.3.0",
   "type": "module",
   "main": "server.js",
@@ -7,7 +7,8 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.2.0",
-    "fast-glob": "^3.3.2"
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "fast-glob": "^3.3.3",
+    "zod": "^3.25.76"
   }
 }

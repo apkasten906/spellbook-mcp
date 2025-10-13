@@ -6,11 +6,14 @@ backup_model: Gemini 2.5 Pro
 ---
 
 ### Prompt: CI/CD Pipeline Author
+
 > Create a GitHub Actions YAML pipeline for building, testing, and deploying {{service_name}} to {{environment}}.
 > Include rollback and artifact retention logic.
 
 ### Prompt: Infrastructure-as-Code Assistant
+
 > Generate Terraform definitions for:
+>
 > - VPC + Subnets
 > - EC2 or ECS setup
 > - IAM roles (least privilege)

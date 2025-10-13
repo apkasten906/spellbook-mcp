@@ -4,114 +4,62 @@
     {
       "file": "prompts/v0.3.0/1_requirements_planning.md",
       "version": "0.3.0",
-      "tags": [
-        "plan",
-        "pm",
-        "requirements"
-      ]
+      "tags": ["plan", "pm", "requirements"]
     },
     {
       "file": "prompts/v0.3.0/2_analysis_specification.md",
       "version": "0.3.0",
-      "tags": [
-        "analysis",
-        "api",
-        "schema",
-        "spec"
-      ]
+      "tags": ["analysis", "api", "schema", "spec"]
     },
     {
       "file": "prompts/v0.3.0/3_architecture_design.md",
       "version": "0.3.0",
-      "tags": [
-        "architecture",
-        "c4",
-        "design",
-        "nfr"
-      ]
+      "tags": ["architecture", "c4", "design", "nfr"]
     },
     {
       "file": "prompts/v0.3.0/4_implementation_development.md",
       "version": "0.3.0",
-      "tags": [
-        "code",
-        "impl",
-        "refactor"
-      ]
+      "tags": ["code", "impl", "refactor"]
     },
     {
       "file": "prompts/v0.3.0/5_testing_quality_assurance.md",
       "version": "0.3.0",
-      "tags": [
-        "e2e",
-        "qa",
-        "test",
-        "unit"
-      ]
+      "tags": ["e2e", "qa", "test", "unit"]
     },
     {
       "file": "prompts/v0.3.0/6_deployment_release.md",
       "version": "0.3.0",
-      "tags": [
-        "cicd",
-        "deploy",
-        "iac",
-        "terraform"
-      ]
+      "tags": ["cicd", "deploy", "iac", "terraform"]
     },
     {
       "file": "prompts/v0.3.0/7_maintenance_monitoring.md",
       "version": "0.3.0",
-      "tags": [
-        "logs",
-        "monitor",
-        "rca"
-      ]
+      "tags": ["logs", "monitor", "rca"]
     },
     {
       "file": "prompts/v0.3.0/meta/PDCA_cycle.md",
       "version": "0.3.0",
-      "tags": [
-        "meta",
-        "pdca",
-        "process"
-      ]
+      "tags": ["meta", "pdca", "process"]
     },
     {
       "file": "prompts/v0.3.0/meta/due_diligence_checklist.md",
       "version": "0.3.0",
-      "tags": [
-        "meta",
-        "pdca",
-        "process"
-      ]
+      "tags": ["meta", "pdca", "process"]
     },
     {
       "file": "prompts/v0.3.0/meta/retrospective_review.md",
       "version": "0.3.0",
-      "tags": [
-        "meta",
-        "pdca",
-        "process"
-      ]
+      "tags": ["meta", "pdca", "process"]
     },
     {
       "file": "prompts/v0.3.0/meta/error_learning_protocol.md",
       "version": "0.3.0",
-      "tags": [
-        "meta",
-        "pdca",
-        "process"
-      ]
+      "tags": ["meta", "pdca", "process"]
     },
     {
       "file": "prompts/v0.3.0/meta/continuous_improvement_tracker.md",
       "version": "0.3.0",
-      "tags": [
-        "meta",
-        "pdca",
-        "process"
-      ]
+      "tags": ["meta", "pdca", "process"]
     }
   ]
 }

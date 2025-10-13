@@ -1,7 +1,11 @@
 # 🪄 Spellbook MCP
 
+A Model Context Protocol server that serves AI prompts as spells — structured, reusable incantations for every phase of the Software Development Life Cycle.
+
 Version: **v0.3.0**  
 License: **MIT**
+
+> *Where every prompt is a spell and every build a ritual.*
 
 A reusable, versioned toolkit of prompts + a lightweight **Model Context Protocol (MCP)** server for AI‑assisted software development. Includes SDLC prompts, PDCA (Deming cycle) meta‑prompts, model routing, and an MCP server exposing everything as tools.
 
@@ -15,8 +19,8 @@ node mcp-starter/server.js
 ## Quick Start (Docker)
 
 ```bash
-docker build -f Dockerfile.mcp -t ai-sdlc-mcp:0.3.0 .
-docker run --rm -it ai-sdlc-mcp:0.3.0
+docker build -f Dockerfile.mcp -t spellbook-mcp:0.3.0 .
+docker run --rm -it spellbook-mcp:0.3.0
 ```
 
 ### MCP Client Setup

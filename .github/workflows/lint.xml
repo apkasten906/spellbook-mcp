@@ -1,0 +1,16 @@
+name: Lint & Format
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node -v
+      - run: npm -C mcp-starter i --omit=dev
+      - run: npm i -D eslint @eslint/js eslint-plugin-n eslint-plugin-import-x eslint-plugin-promise eslint-plugin-unused-imports eslint-config-prettier prettier prettier-plugin-packagejson
+      - run: npm run format:check
+      - run: npm run lint
