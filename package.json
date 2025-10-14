@@ -4,6 +4,7 @@
   "type": "module",
   "main": "mcp-starter/server.js",
   "devDependencies": {
+    "@cucumber/cucumber": "^12.2.0",
     "@eslint/js": "^9.37.0",
     "@eslint/json": "^0.13.2",
     "@eslint/markdown": "^7.4.0",
@@ -23,7 +24,8 @@
     "lint": "npx eslint .",
     "lint:fix": "npx eslint . --fix",
     "format": "npx prettier -w .",
-    "format:check": "npx prettier -c ."
+    "format:check": "npx prettier -c .",
+    "acceptance": "npx cucumber-js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.0",
