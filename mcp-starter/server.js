@@ -208,7 +208,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 });
 
 // Handler for calling tools
-async function handlePromptRead(args) {
+async function handlePromptRead(args = {}) {
   const { file } = args;
   const abs = path.resolve(promptsRoot, file);
   assertInside(promptsRoot, abs);
