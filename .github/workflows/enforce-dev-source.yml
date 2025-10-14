@@ -1,0 +1,17 @@
+name: enforce-dev-source
+on:
+  pull_request:
+    branches: [ main ]
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Block PRs to main unless source is dev
+        run: |
+          echo "PR source: ${{ github.head_ref }}"
+          if [ "${{ github.head_ref }}" != "dev" ]; then
+            echo "Policy: Only allow merges to main from the dev branch."
+            echo "Current source branch: '${{ github.head_ref }}' → blocked."
+            exit 1
+          fi

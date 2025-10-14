@@ -15,7 +15,8 @@
     "prettier": "^3.6.2"
   },
   "scripts": {
-    "start": "powershell -c \"cd mcp-starter; npm start\"",
+    "start:ps": "powershell -c \"cd mcp-starter; npm start\"",
+    "start": "cd mcp-starter && npm start",
     "dev": "powershell -c \"cd mcp-starter; npm run dev\"",
     "docker:build": "docker build -f Dockerfile.mcp -t spellbook-mcp:0.3.0 .",
     "docker:run": "docker run --rm -it spellbook-mcp:0.3.0",
