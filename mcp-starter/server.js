@@ -228,7 +228,7 @@ async function handlePromptRead(args = {}) {
   }
 }
 
-async function handlePromptList(args) {
+async function handlePromptList(args = {}) {
   const { base = '.' } = args;
   const baseAbs = path.resolve(promptsRoot, base);
   assertInside(promptsRoot, baseAbs);
