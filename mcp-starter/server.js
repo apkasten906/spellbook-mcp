@@ -261,8 +261,8 @@ async function handlePromptCommands() {
   };
 }
 
-async function handlePDCAGenerate(args) {
-  const { phase, artifact, scope = 'feature', metrics = '', risk = 'low' } = args || {};
+async function handlePDCAGenerate(args = {}) {
+  const { phase, artifact, scope = 'feature', metrics = '', risk = 'low' } = args;
   let phaseSection = '';
   if (phase === 'plan') {
     phaseSection = `## Hypothesis
@@ -313,8 +313,8 @@ ${phaseSection}
   return { content: [{ type: 'text', text: md }] };
 }
 
-async function handleDueCheck(args) {
-  const base = args?.path
+async function handleDueCheck(args = {}) {
+  const base = args.path
     ? path.resolve(promptsRoot, '..', args.path)
     : path.resolve(promptsRoot, '..');
 
@@ -365,10 +365,10 @@ ${strict ? '> **Strict:** all checks required before merge.\n' : ''}
   return { content: [{ type: 'text', text: md }] };
 }
 
-async function handleRetroCreate(args) {
-  const type = args?.type || 'iteration';
-  const window = args?.window || '30d';
-  const include = args?.include || '';
+async function handleRetroCreate(args = {}) {
+  const type = args.type || 'iteration';
+  const window = args.window || '30d';
+  const include = args.include || '';
   const md = `# Retrospective (${type}) · Window: ${window}
 
 ## What went well
@@ -388,7 +388,7 @@ _Inputs requested:_ ${include || '—'}
   return { content: [{ type: 'text', text: md }] };
 }
 
-async function handleApiScaffold(args) {
+async function handleApiScaffold(args = {}) {
   const {
     name,
     style = 'openapi',
@@ -396,7 +396,7 @@ async function handleApiScaffold(args) {
     tests = false,
     client = false,
     examples = true,
-  } = args || {};
+  } = args;
   if (!name) throw new McpError(ErrorCode.InvalidParams, 'name is required');
 
   if (style === 'openapi') {
@@ -431,14 +431,14 @@ ${extras.join('\n')}`;
   return { content: [{ type: 'text', text: md }] };
 }
 
-async function handleCIConfigure(args) {
+async function handleCIConfigure(args = {}) {
   const {
     service,
     env,
     template = 'full',
     gates = 'lint,test,security',
     secrets = '',
-  } = args || {};
+  } = args;
   if (!service || !env) throw new McpError(ErrorCode.InvalidParams, 'service and env are required');
   const yamlGH = `name: ci-${env}
 on: [push]
@@ -466,14 +466,14 @@ ${template === 'minimal' ? '\n_Note: minimal template; expand gates as needed._'
   return { content: [{ type: 'text', text: md }] };
 }
 
-async function handleTestsPlan(args) {
+async function handleTestsPlan(args = {}) {
   const {
     scope = 'changed',
     target = '',
     type = 'unit',
     framework = 'jest',
     coverage = 80,
-  } = args || {};
+  } = args;
   const md = `# Test Plan
 Scope: ${scope} ${target ? `(${target})` : ''}  |  Type: ${type}  |  Framework: ${framework}  |  Coverage target: ${coverage}%
 
@@ -492,8 +492,8 @@ Scope: ${scope} ${target ? `(${target})` : ''}  |  Type: ${type}  |  Framework: 
   return { content: [{ type: 'text', text: md }] };
 }
 
-async function handleRCAAnalyze(args) {
-  const { log, since = '', diff = '', system = '' } = args || {};
+async function handleRCAAnalyze(args = {}) {
+  const { log, since = '', diff = '', system = '' } = args;
   let logTail = '';
   if (log) {
     try {
@@ -522,8 +522,8 @@ ${logTail ? '## Log tail (last 200 lines)\n```\n' + logTail + '\n```' : ''}`;
   return { content: [{ type: 'text', text: md }] };
 }
 
-async function handleArchADR(args) {
-  const { system, adr = 'Decision Title', diagram, nfr = '' } = args || {};
+async function handleArchADR(args = {}) {
+  const { system, adr = 'Decision Title', diagram, nfr = '' } = args;
   if (!system) throw new McpError(ErrorCode.InvalidParams, 'system is required');
   const md = `# ADR: ${adr}
 System: ${system}
