@@ -432,13 +432,7 @@ ${extras.join('\n')}`;
 }
 
 async function handleCIConfigure(args = {}) {
-  const {
-    service,
-    env,
-    template = 'full',
-    gates = 'lint,test,security',
-    secrets = '',
-  } = args;
+  const { service, env, template = 'full', gates = 'lint,test,security', secrets = '' } = args;
   if (!service || !env) throw new McpError(ErrorCode.InvalidParams, 'service and env are required');
   const yamlGH = `name: ci-${env}
 on: [push]
@@ -467,13 +461,7 @@ ${template === 'minimal' ? '\n_Note: minimal template; expand gates as needed._'
 }
 
 async function handleTestsPlan(args = {}) {
-  const {
-    scope = 'changed',
-    target = '',
-    type = 'unit',
-    framework = 'jest',
-    coverage = 80,
-  } = args;
+  const { scope = 'changed', target = '', type = 'unit', framework = 'jest', coverage = 80 } = args;
   const md = `# Test Plan
 Scope: ${scope} ${target ? `(${target})` : ''}  |  Type: ${type}  |  Framework: ${framework}  |  Coverage target: ${coverage}%
 

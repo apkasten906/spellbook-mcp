@@ -1,7 +1,7 @@
 name: enforce-dev-source
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 jobs:
   guard:
     runs-on: ubuntu-latest

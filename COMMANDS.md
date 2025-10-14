@@ -25,13 +25,13 @@ Concise chat commands for SDLC + PDCA work. Each command includes a short descri
 
 **Purpose:** Create or update a PDCA artifact for a given phase and target document.
 
-**Syntax**
+### Syntax
 
-```
+```bash
 /pdca {phase} {artifact} [--scope <feature|service|repo>] [--metrics <csv>] [--risk <level>]
 ```
 
-**Args**
+### Args
 
 - `phase` _(plan|do|check|act)_ — required
 - `artifact` _(e.g., plan.md, results.md, actions.md)_ — required
@@ -39,11 +39,11 @@ Concise chat commands for SDLC + PDCA work. Each command includes a short descri
 - `--metrics` CSV _(e.g., p95,p99,error_rate)_ — optional
 - `--risk` _(low|med|high)_ — optional, nudges routing toward **5** if `high`
 
-**Output**
+### Output
 
 - Templated PDCA section with: hypothesis/metrics/risks (Plan), change list (Do), findings (Check), updates (Act)
 
-**Routing**
+### Routing
 
 - **4.1** default; **5** if `--risk high`; **4o** if summary-only
 
@@ -53,21 +53,21 @@ Concise chat commands for SDLC + PDCA work. Each command includes a short descri
 
 **Purpose:** Enforce merge-readiness using the SDLC due-diligence checklist.
 
-**Syntax**
+### Syntax
 
-```
+```bash
 /due-diligence [--path <dir|file>] [--strict] [--format <md|json>]
 ```
 
-**Behavior**
+### Behavior
 
 - Validates: tests present & passing, learnings log updated, cleanup complete, docs refreshed, commits conventional, PR ready
 
-**Output**
+### Output
 
 - Markdown or JSON report with pass/fail and action items
 
-**Routing**
+### Routing
 
 - **4.1** (reasoning + structure). **COPILOT** may auto-fix code tasks following the report.
 
@@ -77,17 +77,17 @@ Concise chat commands for SDLC + PDCA work. Each command includes a short descri
 
 **Purpose:** Generate or append to a retrospective (iteration, incident, or release).
 
-**Syntax**
+### Syntax
 
-```
+```bash
 /retro [--type <iteration|incident|release>] [--window <7d|30d|YYYY-MM-DD:YYYY-MM-DD>] [--include <commits|issues|alerts>]
 ```
 
-**Output**
+### Output
 
 - What went well / risks / proposals / owners / next steps
 
-**Routing**
+### Routing
 
 - **4.1** (synthesis). **4o** for quick summaries.
 
@@ -97,17 +97,17 @@ Concise chat commands for SDLC + PDCA work. Each command includes a short descri
 
 **Purpose:** Produce or update API specs, stubs, and tests.
 
-**Syntax**
+### Syntax
 
-```
+```bash
 /api {name} [--style <openapi|grpc|tsoa>] [--lang <ts|go|py|java>] [--tests] [--client] [--examples]
 ```
 
-**Output**
+### Output
 
 - OpenAPI/Proto draft + controllers/stubs + example requests/tests (if flags provided)
 
-**Routing**
+### Routing
 
 - **COPILOT** for code scaffolds; **4.1** to reason about resources & contracts.
 
@@ -117,20 +117,20 @@ Concise chat commands for SDLC + PDCA work. Each command includes a short descri
 
 **Purpose:** Create or edit CI/CD pipelines and policies.
 
-**Syntax**
+### Syntax
 
-```
+```bash
 /ci-cd {service} {env} [--template <minimal|full>] [--gates <lint,test,security,perf>] [--secrets <name,...>]
 ```
 
-**Examples**
+### Examples
 
-```
+```bash
 /ci-cd github actions --template full --gates lint,test,security
 /ci-cd azure prod --gates test,perf --secrets REGISTRY_TOKEN
 ```
 
-**Routing**
+### Routing
 
 - **COPILOT** for YAML & patterns; **4.1** for gate/risk strategy.
 
@@ -140,17 +140,17 @@ Concise chat commands for SDLC + PDCA work. Each command includes a short descri
 
 **Purpose:** Generate or enhance tests (unit/integration/property/e2e).
 
-**Syntax**
+### Syntax
 
-```
+```bash
 /tests [--scope <file|dir|changed>] [--type <unit|integration|property|e2e>] [--framework <jest|vitest|pytest|junit>] [--coverage <target%>]
 ```
 
-**Behavior**
+### Behavior
 
 - Suggests edge cases; scaffolds fixtures/mocks; optional property-based examples
 
-**Routing**
+### Routing
 
 - **COPILOT** for scaffolds; **4.1** for edge-case design.
 
@@ -160,17 +160,17 @@ Concise chat commands for SDLC + PDCA work. Each command includes a short descri
 
 **Purpose:** Root cause analysis for failing tests/incidents.
 
-**Syntax**
+### Syntax
 
-```
+```bash
 /rca [--log <path>] [--since <iso|1h|24h>] [--diff <commit|range>] [--system <name>]
 ```
 
-**Output**
+### Output
 
 - Hypotheses, reproduction steps, narrow fix, risk/impact, confidence
 
-**Routing**
+### Routing
 
 - **4.1** default; escalate to **5** for intermittent or systemic failures.
 
@@ -180,17 +180,17 @@ Concise chat commands for SDLC + PDCA work. Each command includes a short descri
 
 **Purpose:** Architecture decision records (ADRs), diagrams, NFRs.
 
-**Syntax**
+### Syntax
 
-```
+```bash
 /arch {system} [--adr <decision-title>] [--diagram <sequence|c4|dfd>] [--nfr <latency,p99,availability>]
 ```
 
-**Output**
+### Output
 
 - ADR with options/tradeoffs/rollback; text-first diagram snippet; NFR matrix
 
-**Routing**
+### Routing
 
 - **5** for high-risk tradeoffs; **4.1** otherwise; **4o** for diagram iteration.
 
@@ -200,18 +200,18 @@ Concise chat commands for SDLC + PDCA work. Each command includes a short descri
 
 **Purpose:** Utilities to explore and read project prompts.
 
-**Syntax**
+### Syntax
 
-```
+```bash
 /prompt list [--base <dir>]
 /prompt read {relative-path}
 ```
 
-**Behavior**
+### Behavior
 
 - Bridges to MCP tools `prompt_list` and `prompt_read`
 
-**Routing**
+### Routing
 
 - **4o** or **4.1** (light). MCP server handles the file IO.
 
