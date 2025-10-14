@@ -317,6 +317,9 @@ async function handleDueCheck(args) {
   const base = args?.path
     ? path.resolve(promptsRoot, '..', args.path)
     : path.resolve(promptsRoot, '..');
+
+  assertInside(path.resolve(promptsRoot, '..'), base);
+
   const strict = !!args?.strict;
   const format = args?.format || 'md';
 
@@ -495,6 +498,7 @@ async function handleRCAAnalyze(args) {
   if (log) {
     try {
       const abs = path.resolve(promptsRoot, '..', log);
+      assertInside(path.resolve(promptsRoot, '..'), abs);
       const text = await fs.readFile(abs, 'utf-8');
       const lines = text.trim().split(/\r?\n/);
       logTail = lines.slice(-200).join('\n');
