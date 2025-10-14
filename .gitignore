@@ -137,3 +137,11 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Debug and test scripts
+debug-test.ps1
+test-official-client.js
+mcp-server-debug.log
+mcp-client-debug.log
+acceptance.log
+

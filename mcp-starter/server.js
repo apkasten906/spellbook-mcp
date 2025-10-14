@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+import 'dotenv/config';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
@@ -9,10 +9,14 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ErrorCode,
+  InitializeRequestSchema,
   ListToolsRequestSchema,
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
 import fg from 'fast-glob';
+
+const LOG_MCP = process.env.LOG_MCP === 1 || process.env.LOG_MCP === 'true' || process.env.LOG_MCP === 'yes' || process.env.LOG_MCP === 'on' || process.env.LOG_MCP === 'enabled' || process.env.LOG_MCP === 'y' || process.env.LOG_MCP === '1';
+if (LOG_MCP) console.error('[MCP] Logging enabled');
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const promptsRoot = path.resolve(__dirname, '..');
@@ -195,6 +199,23 @@ tools.push(
     },
   }
 );
+
+// Handler for initialization (required by MCP protocol)
+server.setRequestHandler(InitializeRequestSchema, async (request) => {
+  if (LOG_MCP) {
+    console.error('[MCP] Received initialize request:', JSON.stringify(request));
+  }
+  return {
+    protocolVersion: '2024-11-05',
+    capabilities: {
+      tools: {},
+    },
+    serverInfo: {
+      name: 'spellbook-mcp',
+      version: '0.3.0',
+    },
+  };
+});
 
 // Handler for listing tools
 server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -551,44 +572,58 @@ _Text-first sketch_
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
-
+  if (LOG_MCP) {
+    console.error(`[MCP] Tool call: ${name} args:`, JSON.stringify(args));
+  }
   try {
+    let result;
+    console.error(`[MCP] Received request:`, JSON.stringify(request));
     switch (name) {
       case 'prompt_read':
-        return await handlePromptRead(args);
+        result = await handlePromptRead(args); break;
       case 'prompt_list':
-        return await handlePromptList(args);
+        result = await handlePromptList(args); break;
       case 'prompt_commands':
-        return await handlePromptCommands();
+        result = await handlePromptCommands(); break;
       case 'pdca_generate':
-        return await handlePDCAGenerate(args);
+        result = await handlePDCAGenerate(args); break;
       case 'due_check':
-        return await handleDueCheck(args);
+        result = await handleDueCheck(args); break;
       case 'retro_create':
-        return await handleRetroCreate(args);
+        result = await handleRetroCreate(args); break;
       case 'api_scaffold':
-        return await handleApiScaffold(args);
+        result = await handleApiScaffold(args); break;
       case 'ci_configure':
-        return await handleCIConfigure(args);
+        result = await handleCIConfigure(args); break;
       case 'tests_plan':
-        return await handleTestsPlan(args);
+        result = await handleTestsPlan(args); break;
       case 'rca_analyze':
-        return await handleRCAAnalyze(args);
+        result = await handleRCAAnalyze(args); break;
       case 'arch_adr':
-        return await handleArchADR(args);
-
+        result = await handleArchADR(args); break;
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
     }
+    console.error(`[MCP] Sending response for ${name}:`, JSON.stringify(result));
+    if (LOG_MCP) {
+      console.error(`[MCP] Tool result for ${name}:`, JSON.stringify(result));
+    }
+    return result;
   } catch (error) {
+    if (LOG_MCP) {
+      console.error(`[MCP] Tool error for ${name}:`, error);
+    }
     throw new McpError(ErrorCode.InternalError, `Error executing tool ${name}: ${error.message}`);
   }
 });
 
 // Start the server
 async function main() {
+  if (LOG_MCP) console.error('[MCP] About to construct StdioServerTransport');
   const transport = new StdioServerTransport();
+  if (LOG_MCP) console.error('[MCP] StdioServerTransport constructed');
   await server.connect(transport);
+  if (LOG_MCP) console.error('[MCP] server.connect(transport) resolved, transport should be alive and reading');
   console.error('MCP server started: spellbook-mcp v0.3.0');
 }
 

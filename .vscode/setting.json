@@ -1,9 +1,0 @@
-{
-  "mcp.servers": {
-    "spellbook-mcp": {
-      "command": "node",
-      "args": ["C:\\Development\\spellbook-mcp\\spellbook-mcp\\mcp-starter\\server.js"],
-      "env": {}
-    }
-  }
-}

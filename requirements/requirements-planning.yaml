@@ -1,0 +1,73 @@
+epics:
+  - name: Core Tooling & Prompt Library
+    related_issues:
+      - 001-implement-core-tools
+      - 004-prompt-library-expansion
+      - 010-contributing-and-templates
+    stories:
+      - as_a: developer
+        i_want: a set of core MCP tools (prompt_read, prompt_list, etc.)
+        so_that: I can automate prompt management and SDLC workflows
+      - as_a: user
+        i_want: a growing library of reusable prompts for each SDLC phase
+        so_that: I can accelerate and standardize project delivery
+      - as_a: contributor
+        i_want: clear contribution guidelines and templates
+        so_that: I can add new prompts and tools easily
+
+  - name: Quality, CI/CD, and Testing
+    related_issues:
+      - 005-ci-cd-and-quality-gates
+      - 007-e2e-smoke-tests
+      - 009-release-0.4.0
+    stories:
+      - as_a: maintainer
+        i_want: CI/CD pipelines with quality gates
+        so_that: I can ensure code quality and safe releases
+      - as_a: developer
+        i_want: e2e smoke tests and acceptance criteria
+        so_that: I can verify the MCP server works as expected
+
+  - name: Telemetry & Observability
+    related_issues:
+      - 006-telemetry-logging
+    stories:
+      - as_a: maintainer
+        i_want: telemetry and logging for the MCP server
+        so_that: I can monitor usage and diagnose issues
+
+  - name: Developer Experience
+    related_issues:
+      - 008-vscode-setup-docs
+      - 010-contributing-and-templates
+    stories:
+      - as_a: new user
+        i_want: VS Code setup docs and quick start guides
+        so_that: I can get started quickly and contribute
+
+acceptance_criteria:
+  - given: the MCP server is running
+    when: I call a core tool (e.g., prompt_read)
+    then: I receive the expected output for the requested prompt
+
+  - given: a new prompt is added to the library
+    when: I list available prompts
+    then: the new prompt appears in the results
+
+  - given: a pull request is opened
+    when: CI/CD runs
+    then: all quality gates (lint, test, security) must pass before merge
+
+  - given: the server is started
+    when: a user performs actions
+    then: telemetry and logs are recorded for key events
+
+  - given: a new contributor follows the setup docs
+    when: they run the quick start commands
+    then: the server starts and core features are available
+
+risks:
+  - Complexity in supporting multiple prompt formats and SDLC phases
+  - Ensuring extensibility for new tools and prompt types
+  - Keeping documentation and templates up to date with new features
+  - Maintaining test coverage and CI/CD reliability as the project grows
