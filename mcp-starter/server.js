@@ -209,7 +209,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 
 // Handler for calling tools
 async function handlePromptRead(args) {
-  const { file } = args;
+  const { file } = args || {};
   const abs = path.resolve(promptsRoot, file);
   assertInside(promptsRoot, abs);
   try {
@@ -229,7 +229,7 @@ async function handlePromptRead(args) {
 }
 
 async function handlePromptList(args) {
-  const { base = '.' } = args;
+  const { base = '.' } = args || {};
   const baseAbs = path.resolve(promptsRoot, base);
   assertInside(promptsRoot, baseAbs);
   try {
