@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import 'dotenv/config';
-import fs from 'fs/promises';
+import fs from 'fs';
+import fsPromises from 'fs/promises';
 import path from 'path';
 import url from 'url';
 
@@ -16,15 +17,62 @@ import {
 import fg from 'fast-glob';
 
 const LOG_MCP = process.env.LOG_MCP === '1' || process.env.LOG_MCP === 'true' || process.env.LOG_MCP === 'yes' || process.env.LOG_MCP === 'on';
-console.info(`[DEBUG] Raw LOG_MCP value: ${process.env.LOG_MCP}`);
-if (LOG_MCP) {
-  console.info('[MCP] Logging enabled');
-} else {
-  console.info('[MCP] Logging is disabled');
-}
-
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const promptsRoot = path.resolve(__dirname, '..');
+
+// Setup logging to file with rotation and config options
+const LOG_MCP_LOG_PATH = process.env.LOG_MCP_LOG_PATH || path.resolve(__dirname, 'mcp-logging.log');
+// test verbose path is configurable via environment when needed
+// announcement handled by parent process
+const LOG_ROTATE_MAX_BYTES = parseInt(process.env.LOG_ROTATE_MAX_BYTES || '1048576', 10); // 1MB default
+const LOG_ROTATE_BACKUPS = parseInt(process.env.LOG_ROTATE_BACKUPS || '3', 10);
+
+function rotateLogSync(filePath, maxBytes, keepBackups) {
+  try {
+    if (!fs.existsSync(filePath)) return;
+    const st = fs.statSync(filePath);
+    if (st.size < maxBytes) return;
+    const dir = path.dirname(filePath);
+    const base = path.basename(filePath);
+    const rotated = path.join(dir, `${base}.${Date.now()}`);
+    fs.renameSync(filePath, rotated);
+    // cleanup old backups matching base.*
+    const files = fs.readdirSync(dir)
+      .filter((f) => f.startsWith(base + '.'))
+      .map((f) => ({ name: f, time: fs.statSync(path.join(dir, f)).mtimeMs }))
+      .sort((a, b) => b.time - a.time)
+      .map((x) => x.name);
+    while (files.length > keepBackups) {
+      const remove = files.pop();
+  try { fs.unlinkSync(path.join(dir, remove)); } catch { /* ignore */ }
+    }
+  } catch (e) {
+    // If rotation fails, continue without breaking the server
+    console.warn('[MCP] Log rotation failed:', e && e.message);
+  }
+}
+
+// Rotate before creating stream
+rotateLogSync(LOG_MCP_LOG_PATH, LOG_ROTATE_MAX_BYTES, LOG_ROTATE_BACKUPS);
+const logStream = fs.createWriteStream(LOG_MCP_LOG_PATH, { flags: 'a' });
+
+// Do not announce log file location from the child process; the parent test runner will report it.
+
+function logMessage(...parts) {
+  // Accept same args shape as console.error/console.info for convenience
+  const message = parts.map((p) => (typeof p === 'string' ? p : JSON.stringify(p))).join(' ');
+  try { logStream.write(`${new Date().toISOString()} - ${message}\n`); } catch { /* ignore */ }
+}
+
+// Record raw environment values to the file
+logMessage('[DEBUG] Raw LOG_MCP value:', process.env.LOG_MCP);
+logMessage('[DEBUG] Raw MCP_CMD value:', process.env.MCP_CMD);
+logMessage('[DEBUG] Raw MCP_ARGS value:', process.env.MCP_ARGS);
+if (LOG_MCP) {
+  logMessage('[MCP] Logging enabled');
+} else {
+  logMessage('[MCP] Logging is disabled');
+}
 
 function assertInside(base, candidate) {
   const rel = path.relative(base, candidate);
@@ -47,6 +95,7 @@ const server = new Server(
 );
 
 const shutdown = async (signal) => {
+  // Always write shutdown message to stderr so orchestration sees it
   console.error(`Received ${signal}. Shutting down...`);
   try {
     await server?.close?.();
@@ -207,9 +256,7 @@ tools.push(
 
 // Handler for initialization (required by MCP protocol)
 server.setRequestHandler(InitializeRequestSchema, async (request) => {
-  if (LOG_MCP) {
-    console.error('[MCP] Received initialize request:', JSON.stringify(request));
-  }
+  logMessage('[MCP] Received initialize request:', request);
   return {
     protocolVersion: '2024-11-05',
     capabilities: {
@@ -239,7 +286,7 @@ async function handlePromptRead(args = {}) {
   const abs = path.resolve(promptsRoot, file);
   assertInside(promptsRoot, abs);
   try {
-    const content = await fs.readFile(abs, 'utf-8');
+    const content = await fsPromises.readFile(abs, 'utf-8');
     return {
       content: [{ type: 'text', text: content }],
     };
@@ -281,7 +328,7 @@ async function handlePromptList(args = {}) {
 }
 
 async function handlePromptCommands() {
-  const content = await fs.readFile(path.resolve(promptsRoot, 'COMMANDS.md'), 'utf-8');
+  const content = await fsPromises.readFile(path.resolve(promptsRoot, 'COMMANDS.md'), 'utf-8');
   return {
     content: [{ type: 'text', text: content }],
   };
@@ -513,7 +560,7 @@ async function handleRCAAnalyze(args = {}) {
     try {
       const abs = path.resolve(promptsRoot, '..', log);
       assertInside(path.resolve(promptsRoot, '..'), abs);
-      const text = await fs.readFile(abs, 'utf-8');
+      const text = await fsPromises.readFile(abs, 'utf-8');
       const lines = text.trim().split(/\r?\n/);
       logTail = lines.slice(-200).join('\n');
     } catch {
@@ -577,14 +624,10 @@ _Text-first sketch_
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
-  if (LOG_MCP) {
-    console.error(`[MCP] Tool call: ${name} args:`, JSON.stringify(args));
-  }
+  logMessage('[MCP] Tool call:', name, 'args:', args);
   try {
     let result;
-    if (LOG_MCP) {
-      console.error(`[MCP] Received request:`, JSON.stringify(request));
-    }
+    logMessage('[MCP] Received request:', request);
     switch (name) {
       case 'prompt_read':
         result = await handlePromptRead(args); break;
@@ -611,32 +654,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
     }
-    if (LOG_MCP) {
-      console.error(`[MCP] Sending response for ${name}:`, JSON.stringify(result));
-    }
-    if (LOG_MCP) {
-      console.error(`[MCP] Tool result for ${name}:`, JSON.stringify(result));
-    }
+    logMessage('[MCP] Sending response for', name, result);
+    logMessage('[MCP] Tool result for', name, result);
     return result;
   } catch (error) {
-    if (LOG_MCP) {
-      console.error(`[MCP] Tool error for ${name}:`, error);
-    }
+    logMessage('[MCP] Tool error for', name, error);
     throw new McpError(ErrorCode.InternalError, `Error executing tool ${name}: ${error.message}`);
   }
 });
 
 // Start the server
 async function main() {
-  if (LOG_MCP) console.error('[MCP] About to construct StdioServerTransport');
+  logMessage('[MCP] About to construct StdioServerTransport');
   const transport = new StdioServerTransport();
-  if (LOG_MCP) console.error('[MCP] StdioServerTransport constructed');
+  logMessage('[MCP] StdioServerTransport constructed');
   await server.connect(transport);
-  if (LOG_MCP) console.error('[MCP] server.connect(transport) resolved, transport should be alive and reading');
-  if (LOG_MCP) console.error('MCP server started: spellbook-mcp v0.3.0');
+  logMessage('[MCP] server.connect(transport) resolved, transport should be alive and reading');
+  logMessage('MCP server started: spellbook-mcp v0.3.0');
 }
 
 main().catch((error) => {
+  // Fatal startup errors should always go to stderr (and also to file)
   console.error('Server error:', error);
+  logMessage('Server error:', error);
   process.exit(1);
 });

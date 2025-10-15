@@ -1,7 +1,25 @@
 const { Given } = require('@cucumber/cucumber');
 
 Given('I print the world context', function () {
-  console.log('World context:', this);
+  // Avoid dumping large objects to the test runner stdout. When verbose logging is enabled,
+  // write the world context to the cucumber verbose log file instead.
+  if (process.env.LOG_MCP === '1') {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const p = path.resolve(process.cwd(), 'cucumber-verbose.log');
+      let body;
+      try {
+        body = JSON.stringify(this, null, 2);
+      } catch (e) {
+        body = '[unserializable world context]';
+      }
+      fs.appendFileSync(p, `${new Date().toISOString()} - World context:\n${body}\n`);
+    } catch (e) {
+      // If writing the file fails, fallback to a short console message.
+      console.log('[TestWorld] (log write failed) World context available in debug log');
+    }
+  }
   if (typeof this.runTool !== 'function') {
     throw new Error('runTool is not a function on World context');
   }
