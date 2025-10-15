@@ -3,6 +3,7 @@
 **Goal:** Ship curated prompts per SDLC step with PDCA overlay and model routing hints.
 
 ## Tasks
+
 - [ ] Requirements & Planning prompt (SMART + AC + risks)
 - [ ] Design/ADR helper prompt
 - [ ] Test design/edge-case generator

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-
-import fs from 'fs/promises';
+import 'dotenv/config';
+import fsPromises from 'fs/promises';
 import path from 'path';
 import url from 'url';
 
@@ -9,13 +9,27 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ErrorCode,
+  InitializeRequestSchema,
   ListToolsRequestSchema,
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
 import fg from 'fast-glob';
 
+import { info as logMessage, debug as logDebug } from './lib/logger.mjs';
+
+const LOG_MCP = process.env.LOG_MCP === '1' || process.env.LOG_MCP === 'true' || process.env.LOG_MCP === 'yes' || process.env.LOG_MCP === 'on';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const promptsRoot = path.resolve(__dirname, '..');
+
+// Record raw environment values to the file
+logDebug('[DEBUG] Raw LOG_MCP value:', process.env.LOG_MCP);
+logDebug('[DEBUG] Raw MCP_CMD value:', process.env.MCP_CMD);
+logDebug('[DEBUG] Raw MCP_ARGS value:', process.env.MCP_ARGS);
+if (LOG_MCP) {
+  logMessage('[MCP] Logging enabled');
+} else {
+  logMessage('[MCP] Logging is disabled');
+}
 
 function assertInside(base, candidate) {
   const rel = path.relative(base, candidate);
@@ -38,6 +52,7 @@ const server = new Server(
 );
 
 const shutdown = async (signal) => {
+  // Always write shutdown message to stderr so orchestration sees it
   console.error(`Received ${signal}. Shutting down...`);
   try {
     await server?.close?.();
@@ -196,6 +211,21 @@ tools.push(
   }
 );
 
+// Handler for initialization (required by MCP protocol)
+server.setRequestHandler(InitializeRequestSchema, async (request) => {
+  logMessage('[MCP] Received initialize request:', request);
+  return {
+    protocolVersion: '2024-11-05',
+    capabilities: {
+      tools: {},
+    },
+    serverInfo: {
+      name: 'spellbook-mcp',
+      version: '0.3.0',
+    },
+  };
+});
+
 // Handler for listing tools
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
@@ -213,7 +243,7 @@ async function handlePromptRead(args = {}) {
   const abs = path.resolve(promptsRoot, file);
   assertInside(promptsRoot, abs);
   try {
-    const content = await fs.readFile(abs, 'utf-8');
+    const content = await fsPromises.readFile(abs, 'utf-8');
     return {
       content: [{ type: 'text', text: content }],
     };
@@ -255,7 +285,7 @@ async function handlePromptList(args = {}) {
 }
 
 async function handlePromptCommands() {
-  const content = await fs.readFile(path.resolve(promptsRoot, 'COMMANDS.md'), 'utf-8');
+  const content = await fsPromises.readFile(path.resolve(promptsRoot, 'COMMANDS.md'), 'utf-8');
   return {
     content: [{ type: 'text', text: content }],
   };
@@ -432,13 +462,7 @@ ${extras.join('\n')}`;
 }
 
 async function handleCIConfigure(args = {}) {
-  const {
-    service,
-    env,
-    template = 'full',
-    gates = 'lint,test,security',
-    secrets = '',
-  } = args;
+  const { service, env, template = 'full', gates = 'lint,test,security', secrets = '' } = args;
   if (!service || !env) throw new McpError(ErrorCode.InvalidParams, 'service and env are required');
   const yamlGH = `name: ci-${env}
 on: [push]
@@ -467,13 +491,7 @@ ${template === 'minimal' ? '\n_Note: minimal template; expand gates as needed._'
 }
 
 async function handleTestsPlan(args = {}) {
-  const {
-    scope = 'changed',
-    target = '',
-    type = 'unit',
-    framework = 'jest',
-    coverage = 80,
-  } = args;
+  const { scope = 'changed', target = '', type = 'unit', framework = 'jest', coverage = 80 } = args;
   const md = `# Test Plan
 Scope: ${scope} ${target ? `(${target})` : ''}  |  Type: ${type}  |  Framework: ${framework}  |  Coverage target: ${coverage}%
 
@@ -499,7 +517,7 @@ async function handleRCAAnalyze(args = {}) {
     try {
       const abs = path.resolve(promptsRoot, '..', log);
       assertInside(path.resolve(promptsRoot, '..'), abs);
-      const text = await fs.readFile(abs, 'utf-8');
+      const text = await fsPromises.readFile(abs, 'utf-8');
       const lines = text.trim().split(/\r?\n/);
       logTail = lines.slice(-200).join('\n');
     } catch {
@@ -563,48 +581,58 @@ _Text-first sketch_
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
-
+  logMessage('[MCP] Tool call:', name, 'args:', args);
   try {
+    let result;
+    logMessage('[MCP] Received request:', request);
     switch (name) {
       case 'prompt_read':
-        return await handlePromptRead(args);
+        result = await handlePromptRead(args); break;
       case 'prompt_list':
-        return await handlePromptList(args);
+        result = await handlePromptList(args); break;
       case 'prompt_commands':
-        return await handlePromptCommands();
+        result = await handlePromptCommands(); break;
       case 'pdca_generate':
-        return await handlePDCAGenerate(args);
+        result = await handlePDCAGenerate(args); break;
       case 'due_check':
-        return await handleDueCheck(args);
+        result = await handleDueCheck(args); break;
       case 'retro_create':
-        return await handleRetroCreate(args);
+        result = await handleRetroCreate(args); break;
       case 'api_scaffold':
-        return await handleApiScaffold(args);
+        result = await handleApiScaffold(args); break;
       case 'ci_configure':
-        return await handleCIConfigure(args);
+        result = await handleCIConfigure(args); break;
       case 'tests_plan':
-        return await handleTestsPlan(args);
+        result = await handleTestsPlan(args); break;
       case 'rca_analyze':
-        return await handleRCAAnalyze(args);
+        result = await handleRCAAnalyze(args); break;
       case 'arch_adr':
-        return await handleArchADR(args);
-
+        result = await handleArchADR(args); break;
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
     }
+    logMessage('[MCP] Sending response for', name, result);
+    logMessage('[MCP] Tool result for', name, result);
+    return result;
   } catch (error) {
+    logMessage('[MCP] Tool error for', name, error);
     throw new McpError(ErrorCode.InternalError, `Error executing tool ${name}: ${error.message}`);
   }
 });
 
 // Start the server
 async function main() {
+  logMessage('[MCP] About to construct StdioServerTransport');
   const transport = new StdioServerTransport();
+  logMessage('[MCP] StdioServerTransport constructed');
   await server.connect(transport);
-  console.error('MCP server started: spellbook-mcp v0.3.0');
+  logMessage('[MCP] server.connect(transport) resolved, transport should be alive and reading');
+  logMessage('MCP server started: spellbook-mcp v0.3.0');
 }
 
 main().catch((error) => {
+  // Fatal startup errors should always go to stderr (and also to file)
   console.error('Server error:', error);
+  logMessage('Server error:', error);
   process.exit(1);
 });

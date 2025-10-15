@@ -3,6 +3,7 @@
 **Goal:** Ship the first usable tool set aligned with `COMMANDS.md` and the Execution Matrix.
 
 ## Tools to finalize
+
 - [ ] `pdca_generate` — PDCA artifact generator (plan|do|check|act)
 - [ ] `due_check` — due-diligence checklist report (md|json)
 - [ ] `retro_create` — retrospective skeleton
@@ -13,6 +14,7 @@
 - [ ] `arch_adr` — ADR template
 
 ## Acceptance criteria
+
 - Tools listed by `ListTools` and runnable via VS Code MCP.
 - All handlers return Markdown (or JSON where specified) and never throw on user input validation (use structured error via MCP).
 - Basic unit tests for pure helpers.
