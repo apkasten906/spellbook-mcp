@@ -5,6 +5,8 @@ preferred_model: GPT-4.1 (ChatGPT Plus)
 backup_model: Claude Sonnet 4
 ---
 
+<!-- Assistant priming: When generating PDCA actions, tie recommendations to CONTRIBUTING.md practices: small PRs, tests, logging config, and branching guidance. -->
+
 ### Prompt: Apply the PDCA cycle to this task
 
 > For the given SDLC phase {{phase_name}} and artifact {{artifact_name}},
