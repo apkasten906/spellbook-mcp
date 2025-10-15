@@ -9,6 +9,8 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.0",
     "fast-glob": "^3.3.3",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "winston": "^3.9.0",
+    "winston-daily-rotate-file": "^4.7.1"
   }
 }

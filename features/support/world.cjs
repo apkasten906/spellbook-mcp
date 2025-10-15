@@ -12,9 +12,13 @@ class TestWorld {
     if (testEnv.LOG_MCP === '1') {
       const fs = require('fs');
       const path = require('path');
+      // Prefer an explicit LOG_DIR if provided, otherwise default to mcp-starter/logs
+      const logDir = process.env.LOG_DIR || path.resolve(__dirname, '..', 'mcp-starter', 'logs');
+      try { fs.mkdirSync(logDir, { recursive: true }); } catch (e) { /* ignore */ }
+
       // Only announce the verbose log path once per test run
       if (!global.__TESTWORLD_VERBOSE_ANNOUNCED) {
-        this._testLogPath = path.resolve(process.cwd(), 'cucumber-verbose.log');
+        this._testLogPath = path.resolve(logDir, 'cucumber-verbose.log');
         this._testLogStream = fs.createWriteStream(this._testLogPath, { flags: 'a' });
         // Print the file location once so CI or local users know where to look
         console.log(`[TestWorld] Verbose cucumber logging enabled. Writing to: ${this._testLogPath}`);
@@ -26,7 +30,7 @@ class TestWorld {
       } else {
         // If the stream wasn't created yet in the first instance, create it so later instances can write
         if (!this._testLogStream) {
-          const p = path.resolve(process.cwd(), 'cucumber-verbose.log');
+          const p = path.resolve(logDir, 'cucumber-verbose.log');
           this._testLogPath = p;
           this._testLogStream = fs.createWriteStream(this._testLogPath, { flags: 'a' });
         }
@@ -49,8 +53,9 @@ class TestWorld {
       await this.client.start();
       // Announce server-side MCP log path from parent process (avoids PowerShell RemoteException)
       if (testEnv.LOG_MCP === '1' && !global.__MCP_LOG_ANNOUNCED) {
-        const logPath = testEnv.LOG_MCP_LOG_PATH || require('path').resolve(__dirname, '..', 'mcp-starter', 'mcp-logging.log');
-        console.log(`[MCP] Server log file: ${logPath}`);
+        // Announce the server log directory so users can find rotated files
+        const logDir = testEnv.LOG_DIR || require('path').resolve(__dirname, '..', 'mcp-starter', 'logs');
+        console.log(`[MCP] Server log directory: ${logDir} (files: mcp-<DATE>.log, mcp-error-<DATE>.log)`);
         global.__MCP_LOG_ANNOUNCED = true;
       }
     }

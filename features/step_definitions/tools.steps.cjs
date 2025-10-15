@@ -7,7 +7,9 @@ Given('I print the world context', function () {
     try {
       const fs = require('fs');
       const path = require('path');
-      const p = path.resolve(process.cwd(), 'cucumber-verbose.log');
+      const logDir = process.env.LOG_DIR || path.resolve(__dirname, '..', 'mcp-starter', 'logs');
+      try { fs.mkdirSync(logDir, { recursive: true }); } catch (e) { /* ignore */ }
+      const p = path.resolve(logDir, 'cucumber-verbose.log');
       let body;
       try {
         body = JSON.stringify(this, null, 2);

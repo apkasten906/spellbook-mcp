@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import 'dotenv/config';
-import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
 import url from 'url';
@@ -16,58 +15,16 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import fg from 'fast-glob';
 
+import { info as logMessage, debug as logDebug } from './lib/logger.mjs';
+
 const LOG_MCP = process.env.LOG_MCP === '1' || process.env.LOG_MCP === 'true' || process.env.LOG_MCP === 'yes' || process.env.LOG_MCP === 'on';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const promptsRoot = path.resolve(__dirname, '..');
 
-// Setup logging to file with rotation and config options
-const LOG_MCP_LOG_PATH = process.env.LOG_MCP_LOG_PATH || path.resolve(__dirname, 'mcp-logging.log');
-// test verbose path is configurable via environment when needed
-// announcement handled by parent process
-const LOG_ROTATE_MAX_BYTES = parseInt(process.env.LOG_ROTATE_MAX_BYTES || '1048576', 10); // 1MB default
-const LOG_ROTATE_BACKUPS = parseInt(process.env.LOG_ROTATE_BACKUPS || '3', 10);
-
-function rotateLogSync(filePath, maxBytes, keepBackups) {
-  try {
-    if (!fs.existsSync(filePath)) return;
-    const st = fs.statSync(filePath);
-    if (st.size < maxBytes) return;
-    const dir = path.dirname(filePath);
-    const base = path.basename(filePath);
-    const rotated = path.join(dir, `${base}.${Date.now()}`);
-    fs.renameSync(filePath, rotated);
-    // cleanup old backups matching base.*
-    const files = fs.readdirSync(dir)
-      .filter((f) => f.startsWith(base + '.'))
-      .map((f) => ({ name: f, time: fs.statSync(path.join(dir, f)).mtimeMs }))
-      .sort((a, b) => b.time - a.time)
-      .map((x) => x.name);
-    while (files.length > keepBackups) {
-      const remove = files.pop();
-  try { fs.unlinkSync(path.join(dir, remove)); } catch { /* ignore */ }
-    }
-  } catch (e) {
-    // If rotation fails, continue without breaking the server
-    console.warn('[MCP] Log rotation failed:', e && e.message);
-  }
-}
-
-// Rotate before creating stream
-rotateLogSync(LOG_MCP_LOG_PATH, LOG_ROTATE_MAX_BYTES, LOG_ROTATE_BACKUPS);
-const logStream = fs.createWriteStream(LOG_MCP_LOG_PATH, { flags: 'a' });
-
-// Do not announce log file location from the child process; the parent test runner will report it.
-
-function logMessage(...parts) {
-  // Accept same args shape as console.error/console.info for convenience
-  const message = parts.map((p) => (typeof p === 'string' ? p : JSON.stringify(p))).join(' ');
-  try { logStream.write(`${new Date().toISOString()} - ${message}\n`); } catch { /* ignore */ }
-}
-
 // Record raw environment values to the file
-logMessage('[DEBUG] Raw LOG_MCP value:', process.env.LOG_MCP);
-logMessage('[DEBUG] Raw MCP_CMD value:', process.env.MCP_CMD);
-logMessage('[DEBUG] Raw MCP_ARGS value:', process.env.MCP_ARGS);
+logDebug('[DEBUG] Raw LOG_MCP value:', process.env.LOG_MCP);
+logDebug('[DEBUG] Raw MCP_CMD value:', process.env.MCP_CMD);
+logDebug('[DEBUG] Raw MCP_ARGS value:', process.env.MCP_ARGS);
 if (LOG_MCP) {
   logMessage('[MCP] Logging enabled');
 } else {
