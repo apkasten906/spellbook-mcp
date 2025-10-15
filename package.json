@@ -8,13 +8,13 @@
     "@eslint/js": "^9.37.0",
     "@eslint/json": "^0.13.2",
     "@eslint/markdown": "^7.4.0",
+    "cross-env": "^7.0.3",
     "eslint": "^9.37.0",
     "eslint-plugin-import-x": "^4.16.1",
     "eslint-plugin-n": "^17.23.1",
     "globals": "^16.4.0",
     "nodemon": "^3.1.10",
-    "prettier": "^3.6.2",
-    "cross-env": "^7.0.3"
+    "prettier": "^3.6.2"
   },
   "scripts": {
     "start:ps": "powershell -c \"cd mcp-starter; npm start\"",
@@ -22,6 +22,8 @@
     "dev": "powershell -c \"cd mcp-starter; npm run dev\"",
     "docker:build": "docker build -f Dockerfile.mcp -t spellbook-mcp:0.3.0 .",
     "docker:run": "docker run --rm -it spellbook-mcp:0.3.0",
+    "docker:acceptance": "docker run --rm -it -v ${PWD}/mcp-starter/logs:/app/mcp-starter/logs spellbook-mcp:0.3.0 /bin/sh -c \"cd /app && npm run acceptance\"",
+    "smoketest": "powershell -c \"./scripts/run-acceptance-docker.ps1\"",
     "lint": "npx eslint .",
     "lint:fix": "npx eslint . --fix",
     "format": "npx prettier -w .",
