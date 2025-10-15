@@ -344,11 +344,12 @@ ${phaseSection}
 }
 
 async function handleDueCheck(args = {}) {
-  const base = args.path
-    ? path.resolve(promptsRoot, '..', args.path)
-    : path.resolve(promptsRoot, '..');
+  // Resolve the base path relative to the repository root (promptsRoot).
+  // Previous code used promptsRoot's parent which caused glob to scan outside the repo
+  // and could take a very long time or hit permission errors. Use promptsRoot here.
+  const base = args.path ? path.resolve(promptsRoot, args.path) : path.resolve(promptsRoot);
 
-  assertInside(path.resolve(promptsRoot, '..'), base);
+  assertInside(path.resolve(promptsRoot), base);
 
   const strict = !!args?.strict;
   const format = args?.format || 'md';
