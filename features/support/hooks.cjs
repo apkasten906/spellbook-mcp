@@ -1,9 +1,15 @@
-const { Before, AfterAll } = require('@cucumber/cucumber');
+const { After, AfterAll } = require('@cucumber/cucumber');
 
-Before(async function () {
-  await this.startClient();
+// Clean up after each scenario to prevent hanging processes
+After(async function () {
+  if (this.stopClient) {
+    await this.stopClient();
+  }
 });
 
-AfterAll(function () {
-  return this.stopClient && this.stopClient();
+// Final cleanup after all tests
+AfterAll(async function () {
+  if (this.stopClient) {
+    await this.stopClient();
+  }
 });

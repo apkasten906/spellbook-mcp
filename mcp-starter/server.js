@@ -15,8 +15,13 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import fg from 'fast-glob';
 
-const LOG_MCP = process.env.LOG_MCP === 1 || process.env.LOG_MCP === 'true' || process.env.LOG_MCP === 'yes' || process.env.LOG_MCP === 'on' || process.env.LOG_MCP === 'enabled' || process.env.LOG_MCP === 'y' || process.env.LOG_MCP === '1';
-if (LOG_MCP) console.error('[MCP] Logging enabled');
+const LOG_MCP = process.env.LOG_MCP === '1' || process.env.LOG_MCP === 'true' || process.env.LOG_MCP === 'yes' || process.env.LOG_MCP === 'on';
+console.info(`[DEBUG] Raw LOG_MCP value: ${process.env.LOG_MCP}`);
+if (LOG_MCP) {
+  console.info('[MCP] Logging enabled');
+} else {
+  console.info('[MCP] Logging is disabled');
+}
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const promptsRoot = path.resolve(__dirname, '..');
@@ -577,7 +582,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
   try {
     let result;
-    console.error(`[MCP] Received request:`, JSON.stringify(request));
+    if (LOG_MCP) {
+      console.error(`[MCP] Received request:`, JSON.stringify(request));
+    }
     switch (name) {
       case 'prompt_read':
         result = await handlePromptRead(args); break;
@@ -604,7 +611,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
     }
-    console.error(`[MCP] Sending response for ${name}:`, JSON.stringify(result));
+    if (LOG_MCP) {
+      console.error(`[MCP] Sending response for ${name}:`, JSON.stringify(result));
+    }
     if (LOG_MCP) {
       console.error(`[MCP] Tool result for ${name}:`, JSON.stringify(result));
     }
@@ -624,7 +633,7 @@ async function main() {
   if (LOG_MCP) console.error('[MCP] StdioServerTransport constructed');
   await server.connect(transport);
   if (LOG_MCP) console.error('[MCP] server.connect(transport) resolved, transport should be alive and reading');
-  console.error('MCP server started: spellbook-mcp v0.3.0');
+  if (LOG_MCP) console.error('MCP server started: spellbook-mcp v0.3.0');
 }
 
 main().catch((error) => {
