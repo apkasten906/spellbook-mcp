@@ -584,7 +584,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   logMessage('[MCP] Tool call:', name, 'args:', args);
   try {
     let result;
-    logMessage('[MCP] Received request:', request);
     switch (name) {
       case 'prompt_read':
         result = await handlePromptRead(args); break;
@@ -611,7 +610,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
     }
-    logMessage('[MCP] Sending response for', name, result);
     logMessage('[MCP] Tool result for', name, result);
     return result;
   } catch (error) {
