@@ -1,3 +1,37 @@
+# Multi-stage Dockerfile for Spellbook MCP
+# - stage `test`: installs devDependencies and is used by CI to run acceptance tests
+# - stage `runtime`: lean production image with only prod deps
+
+FROM node:20-alpine AS test
+WORKDIR /app
+# Copy root package.json and mcp-starter package.json to leverage layer caching
+COPY package.json package-lock.json* ./
+COPY mcp-starter/package.json ./mcp-starter/package.json
+
+# Install all deps (including dev) in the test image for CI test runs
+RUN npm ci --quiet
+
+# Copy the rest of the repo into the test image
+COPY . .
+
+# Ensure logs directory exists for tests
+RUN mkdir -p /app/mcp-starter/logs && chown -R node:node /app/mcp-starter/logs || true
+
+# Expose a test entrypoint that CI can use (keeps tests reproducible)
+CMD ["/bin/sh", "-c", "cd /app && npm run acceptance:quick:logging"]
+
+FROM node:20-alpine AS runtime
+WORKDIR /app
+# Copy only production deps to the runtime image
+COPY mcp-starter/package.json ./mcp-starter/package.json
+RUN cd mcp-starter && npm i --omit=dev --production --quiet
+
+# Copy application files (excluding dev-only files ideally)
+COPY . .
+
+RUN mkdir -p /app/mcp-starter/logs && chown -R node:node /app/mcp-starter/logs || true
+
+CMD ["node", "mcp-starter/server.js"]
 FROM node:20-alpine
 WORKDIR /app
 COPY mcp-starter/package.json ./mcp-starter/package.json

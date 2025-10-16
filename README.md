@@ -23,6 +23,21 @@ docker build -f Dockerfile.mcp -t spellbook-mcp:0.3.0 .
 docker run --rm -it spellbook-mcp:0.3.0
 ```
 
+### Local acceptance smoke (PowerShell)
+
+If you want to run the quick acceptance smoke locally inside Docker (mirrors CI), use the included PowerShell helper or the npm `smoketest` script:
+
+```powershell
+# Build a local image
+docker build -f Dockerfile.mcp -t spellbook-mcp:local .
+
+# Run the smoke test with mounted logs directory (writes to ./mcp-starter/logs)
+docker run --rm -it -v ${PWD}\mcp-starter\logs:/app/mcp-starter/logs spellbook-mcp:local /bin/sh -c "cd /app && npm run acceptance:quick:logging"
+
+# Or use the included helper that wraps the same logic
+npm run smoketest
+```
+
 ### MCP Client Setup
 
 Point your MCP-enabled client (Claude desktop, Cursor, VS Code MCP bridge) at **.mcp.json**.
