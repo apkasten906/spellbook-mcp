@@ -59,7 +59,8 @@ jobs:
           mkdir -p mcp-starter/logs
 
           # create a container from the test image and run the unit test script
-          CONTAINER_ID=$(docker create --entrypoint '/bin/sh' -e LOG_MCP=1 -e LOG_DIR=/app/mcp-starter/logs spellbook-mcp:test -c "cd /app && npm run test:unit")
+          # run the unit test from the mcp-starter subfolder where the script is defined
+          CONTAINER_ID=$(docker create --entrypoint '/bin/sh' -e LOG_MCP=1 -e LOG_DIR=/app/mcp-starter/logs spellbook-mcp:test -c "cd /app/mcp-starter && npm run test:unit")
           echo "Created unit-test container: $CONTAINER_ID"
           docker start -a "$CONTAINER_ID" || true
 
