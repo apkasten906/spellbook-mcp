@@ -32,7 +32,7 @@ jobs:
           mkdir -p mcp-starter/logs
 
           # Create container using --entrypoint /bin/sh and run the acceptance command via -c
-          CONTAINER_ID=$(docker create --entrypoint '/bin/sh' -e LOG_MCP=1 -e LOG_DIR=/app/mcp-starter/logs spellbook-mcp:ci -c "cd /app && npm --prefix /app/mcp-starter ci --omit=dev && cd /app && npm run acceptance")
+          CONTAINER_ID=$(docker create --entrypoint '/bin/sh' -e LOG_MCP=1 -e LOG_DIR=/app/mcp-starter/logs spellbook-mcp:ci -c "cd /app && npm --prefix /app/mcp-starter ci && cd /app && npm run acceptance")
           echo "Created container: $CONTAINER_ID"
 
           # Start container and stream output (so we capture test console output in the job log)
