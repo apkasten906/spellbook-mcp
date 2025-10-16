@@ -55,9 +55,12 @@ jobs:
           # helper to run a named npm script inside a container and return exit code
           run_in_container() {
             local script="$1"
-            CONTAINER_ID=$(docker create --entrypoint '/bin/sh' -e LOG_MCP=1 -e LOG_DIR=/app/mcp-starter/logs spellbook-mcp:ci -c "cd /app && npm --prefix /app/mcp-starter ci && cd /app && npm run $script")
+            # create container that will install devDependencies at repo root
+            CONTAINER_ID=$(docker create --entrypoint '/bin/sh' -e LOG_MCP=1 -e LOG_DIR=/app/mcp-starter/logs spellbook-mcp:ci -c "cd /app && npm ci && cd /app && npm run $script")
             echo "Created container for $script: $CONTAINER_ID"
             docker start -a "$CONTAINER_ID" || true
+            # ensure logs dir exists locally and try to copy any logs back (ignore errors)
+            mkdir -p mcp-starter/logs
             docker cp "${CONTAINER_ID}:/app/mcp-starter/logs/." mcp-starter/logs/ || true
             EXIT_CODE=$(docker inspect "$CONTAINER_ID" --format='{{.State.ExitCode}}') || true
             echo "Container exit code for $script: $EXIT_CODE"

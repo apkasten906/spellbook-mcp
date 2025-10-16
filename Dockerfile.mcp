@@ -3,4 +3,5 @@ WORKDIR /app
 COPY mcp-starter/package.json ./mcp-starter/package.json
 RUN cd mcp-starter && npm i --omit=dev
 COPY . .
+RUN mkdir -p /app/mcp-starter/logs && chown -R node:node /app/mcp-starter/logs || true
 CMD ["node", "mcp-starter/server.js"]
