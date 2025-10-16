@@ -17,37 +17,60 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image (spellbook-mcp:ci)
-        run: |
-          docker build --file Dockerfile.mcp -t spellbook-mcp:ci .
+      - name: Restore build cache (optional)
+        uses: actions/cache@v4
+        with:
+          path: |-
+            /tmp/.buildx-cache
+          key: buildx-cache-${{ github.sha }}
+          restore-keys: |
+            buildx-cache-
 
-      - name: Run acceptance smoke inside Docker
+      - name: Build Docker image (spellbook-mcp:ci) with cache
+        run: |
+          docker buildx build --file Dockerfile.mcp -t spellbook-mcp:ci \
+            --load \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new || true
+          # move new cache into cache dir for upload by actions/cache
+          rm -rf /tmp/.buildx-cache || true
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
+
+      - name: Run quick-smoke then full acceptance inside Docker
         id: acceptance
         env:
           LOG_MCP: '1'
           LOG_DIR: '/app/mcp-starter/logs'
         run: |
           set -euo pipefail
-          # Ensure logs dir exists on host
           mkdir -p mcp-starter/logs
 
-          # Create container using --entrypoint /bin/sh and run the acceptance command via -c
-          CONTAINER_ID=$(docker create --entrypoint '/bin/sh' -e LOG_MCP=1 -e LOG_DIR=/app/mcp-starter/logs spellbook-mcp:ci -c "cd /app && npm --prefix /app/mcp-starter ci && cd /app && npm run acceptance")
-          echo "Created container: $CONTAINER_ID"
+          # helper to run a named npm script inside a container and return exit code
+          run_in_container() {
+            local script="$1"
+            CONTAINER_ID=$(docker create --entrypoint '/bin/sh' -e LOG_MCP=1 -e LOG_DIR=/app/mcp-starter/logs spellbook-mcp:ci -c "cd /app && npm --prefix /app/mcp-starter ci && cd /app && npm run $script")
+            echo "Created container for $script: $CONTAINER_ID"
+            docker start -a "$CONTAINER_ID" || true
+            docker cp "${CONTAINER_ID}:/app/mcp-starter/logs/." mcp-starter/logs/ || true
+            EXIT_CODE=$(docker inspect "$CONTAINER_ID" --format='{{.State.ExitCode}}') || true
+            echo "Container exit code for $script: $EXIT_CODE"
+            docker rm "$CONTAINER_ID" >/dev/null || true
+            return $EXIT_CODE
+          }
 
-          # Start container and stream output (so we capture test console output in the job log)
-          docker start -a "$CONTAINER_ID" || true
+          # Run quick smoke first (fail-fast)
+          run_in_container acceptance:quick
+          QUICK_EXIT=$?
+          if [ "$QUICK_EXIT" -ne 0 ]; then
+            echo "Quick smoke failed with $QUICK_EXIT"
+            exit $QUICK_EXIT
+          fi
 
-          # Copy logs out of container to host workspace for artifact upload
-          docker cp "${CONTAINER_ID}:/app/mcp-starter/logs/." mcp-starter/logs/ || true
-
-          # Inspect container exit code
-          EXIT_CODE=$(docker inspect "$CONTAINER_ID" --format='{{.State.ExitCode}}') || true
-          echo "Container exit code: $EXIT_CODE"
-          docker rm "$CONTAINER_ID" >/dev/null || true
-          if [ "$EXIT_CODE" -ne 0 ]; then
-            echo "Container exited with code $EXIT_CODE"
-            exit $EXIT_CODE
+          # If quick smoke passed, run full acceptance
+          run_in_container acceptance
+          FULL_EXIT=$?
+          if [ "$FULL_EXIT" -ne 0 ]; then
+            echo "Full acceptance failed with $FULL_EXIT"
+            exit $FULL_EXIT
           fi
 
       - name: Upload logs on failure
