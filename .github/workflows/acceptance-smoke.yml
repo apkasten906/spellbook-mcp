@@ -28,12 +28,20 @@ jobs:
 
       - name: Build Docker image (spellbook-mcp:ci) with cache
         run: |
+          # Use restored cache if present as cache-from
+          CACHE_FROM=""
+          if [ -d /tmp/.buildx-cache ]; then
+            CACHE_FROM="--cache-from=type=local,src=/tmp/.buildx-cache"
+          fi
           docker buildx build --file Dockerfile.mcp -t spellbook-mcp:ci \
             --load \
-            --cache-to=type=local,dest=/tmp/.buildx-cache-new || true
-          # move new cache into cache dir for upload by actions/cache
+            $CACHE_FROM \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new .
+          # move new cache into cache dir for upload by actions/cache (if created)
           rm -rf /tmp/.buildx-cache || true
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
+          if [ -d /tmp/.buildx-cache-new ]; then
+            mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
+          fi
 
       - name: Run quick-smoke then full acceptance inside Docker
         id: acceptance
