@@ -28,10 +28,10 @@
     "lint:fix": "npx eslint . --fix",
     "format": "npx prettier -w .",
     "format:check": "npx prettier -c .",
-  "acceptance": "npx cucumber-js",
-  "acceptance:logging": "cross-env LOG_MCP=1 npx cucumber-js",
-  "acceptance:quick": "npx cucumber-js --tags @quick",
-  "acceptance:quick:logging": "cross-env LOG_MCP=1 npx cucumber-js --tags @quick"
+    "acceptance": "npx cucumber-js",
+    "acceptance:logging": "cross-env LOG_MCP=1 npx cucumber-js",
+    "acceptance:quick": "npx cucumber-js --tags @quick",
+    "acceptance:quick:logging": "cross-env LOG_MCP=1 npx cucumber-js --tags @quick"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.0",
