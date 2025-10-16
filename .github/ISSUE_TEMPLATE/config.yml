@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Support
+    url: https://github.com/apkasten906/spellbook-mcp/discussions
+    about: Ask for help on the project discussion board
