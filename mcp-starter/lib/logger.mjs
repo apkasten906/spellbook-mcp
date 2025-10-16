@@ -16,7 +16,7 @@ const maxFiles = process.env.LOG_ROTATE_BACKUPS || '3';
 // Ensure log dir exists
 try {
   fs.mkdirSync(LOG_DIR, { recursive: true });
-} catch (e) {
+} catch {
   // ignore
 }
 

@@ -1,0 +1,133 @@
+name: Acceptance Smoke
+
+on:
+  push:
+    branches: [ dev, ci/acceptance-smoke ]
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+  acceptance-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Restore build cache (optional)
+        uses: actions/cache@v4
+        with:
+          path: |-
+            /tmp/.buildx-cache
+          key: buildx-cache-${{ github.sha }}
+          restore-keys: |
+            buildx-cache-
+
+      - name: Build Docker image (spellbook-mcp:test + spellbook-mcp:ci) with cache
+        run: |
+          # Use restored cache if present as cache-from
+          CACHE_FROM=""
+          if [ -d /tmp/.buildx-cache ]; then
+            CACHE_FROM="--cache-from=type=local,src=/tmp/.buildx-cache"
+          fi
+          # Build the test target (includes devDependencies) for CI and also tag the default runtime image
+          docker buildx build --file Dockerfile.mcp --target test -t spellbook-mcp:test \
+            --load \
+            $CACHE_FROM \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new .
+          # Also build the runtime image tag for compatibility (no target)
+          docker buildx build --file Dockerfile.mcp -t spellbook-mcp:ci \
+            --load \
+            $CACHE_FROM \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new .
+          # move new cache into cache dir for upload by actions/cache (if created)
+          rm -rf /tmp/.buildx-cache || true
+          if [ -d /tmp/.buildx-cache-new ]; then
+            mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
+          fi
+
+      - name: Run unit tests inside Docker test image
+        id: unit-tests
+        env:
+          LOG_MCP: '1'
+          LOG_DIR: '/app/mcp-starter/logs'
+        run: |
+          set -euo pipefail
+          mkdir -p mcp-starter/logs
+
+          # create a container from the test image and run the unit test script
+          # run the unit test from the mcp-starter subfolder where the script is defined
+          CONTAINER_ID=$(docker create --entrypoint '/bin/sh' -e LOG_MCP=1 -e LOG_DIR=/app/mcp-starter/logs spellbook-mcp:test -c "cd /app/mcp-starter && npm run test:unit")
+          echo "Created unit-test container: $CONTAINER_ID"
+          docker start -a "$CONTAINER_ID" || true
+
+          # copy logs back if any
+          mkdir -p mcp-starter/logs
+          docker cp "${CONTAINER_ID}:/app/mcp-starter/logs/." mcp-starter/logs/ || true
+
+          EXIT_CODE=$(docker inspect "$CONTAINER_ID" --format='{{.State.ExitCode}}') || true
+          echo "Unit tests container exit code: $EXIT_CODE"
+          docker rm "$CONTAINER_ID" >/dev/null || true
+
+          if [ "$EXIT_CODE" -ne 0 ]; then
+            echo "Unit tests failed with exit code $EXIT_CODE"
+            exit $EXIT_CODE
+          fi
+
+      - name: Run quick-smoke then full acceptance inside Docker
+        id: acceptance
+        env:
+          LOG_MCP: '1'
+          LOG_DIR: '/app/mcp-starter/logs'
+        run: |
+          set -euo pipefail
+          mkdir -p mcp-starter/logs
+
+          # helper to run a named npm script inside a container and return exit code
+          run_in_container() {
+            local script="$1"
+            # create container from the test image (devDependencies are preinstalled in the test target)
+            CONTAINER_ID=$(docker create --entrypoint '/bin/sh' -e LOG_MCP=1 -e LOG_DIR=/app/mcp-starter/logs spellbook-mcp:test -c "cd /app && npm run $script")
+            echo "Created container for $script: $CONTAINER_ID"
+            docker start -a "$CONTAINER_ID" || true
+            # ensure logs dir exists locally and try to copy any logs back (ignore errors)
+            mkdir -p mcp-starter/logs
+            docker cp "${CONTAINER_ID}:/app/mcp-starter/logs/." mcp-starter/logs/ || true
+            EXIT_CODE=$(docker inspect "$CONTAINER_ID" --format='{{.State.ExitCode}}') || true
+            echo "Container exit code for $script: $EXIT_CODE"
+            docker rm "$CONTAINER_ID" >/dev/null || true
+            return $EXIT_CODE
+          }
+
+          # Run quick smoke first (fail-fast)
+          run_in_container acceptance:quick
+          QUICK_EXIT=$?
+          if [ "$QUICK_EXIT" -ne 0 ]; then
+            echo "Quick smoke failed with $QUICK_EXIT"
+            exit $QUICK_EXIT
+          fi
+
+          # If quick smoke passed, run full acceptance
+          run_in_container acceptance
+          FULL_EXIT=$?
+          if [ "$FULL_EXIT" -ne 0 ]; then
+            echo "Full acceptance failed with $FULL_EXIT"
+            exit $FULL_EXIT
+          fi
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: acceptance-logs
+          path: mcp-starter/logs/**
+
+      - name: Upload logs (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: acceptance-logs-all
+          path: mcp-starter/logs/**
