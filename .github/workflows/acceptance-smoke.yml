@@ -26,13 +26,19 @@ jobs:
           restore-keys: |
             buildx-cache-
 
-      - name: Build Docker image (spellbook-mcp:ci) with cache
+      - name: Build Docker image (spellbook-mcp:test + spellbook-mcp:ci) with cache
         run: |
           # Use restored cache if present as cache-from
           CACHE_FROM=""
           if [ -d /tmp/.buildx-cache ]; then
             CACHE_FROM="--cache-from=type=local,src=/tmp/.buildx-cache"
           fi
+          # Build the test target (includes devDependencies) for CI and also tag the default runtime image
+          docker buildx build --file Dockerfile.mcp --target test -t spellbook-mcp:test \
+            --load \
+            $CACHE_FROM \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new .
+          # Also build the runtime image tag for compatibility (no target)
           docker buildx build --file Dockerfile.mcp -t spellbook-mcp:ci \
             --load \
             $CACHE_FROM \
@@ -55,8 +61,8 @@ jobs:
           # helper to run a named npm script inside a container and return exit code
           run_in_container() {
             local script="$1"
-            # create container that will install devDependencies at repo root
-            CONTAINER_ID=$(docker create --entrypoint '/bin/sh' -e LOG_MCP=1 -e LOG_DIR=/app/mcp-starter/logs spellbook-mcp:ci -c "cd /app && npm ci && cd /app && npm run $script")
+            # create container from the test image (devDependencies are preinstalled in the test target)
+            CONTAINER_ID=$(docker create --entrypoint '/bin/sh' -e LOG_MCP=1 -e LOG_DIR=/app/mcp-starter/logs spellbook-mcp:test -c "cd /app && npm run $script")
             echo "Created container for $script: $CONTAINER_ID"
             docker start -a "$CONTAINER_ID" || true
             # ensure logs dir exists locally and try to copy any logs back (ignore errors)
