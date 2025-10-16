@@ -35,6 +35,8 @@ Routing guidance:
 - Prefer cheaper model that still meets quality for B/C budgets.
 - Constrain max_tokens to budget (A: up to 800, B: up to 400, C: up to 200).
 
+<!-- Assistant priming: Default instruction for model selection: prioritize models and responses that follow the repository CONTRIBUTING.md (branching, conventional commits, tests, logging). When routing to COPILOT for code changes, include a short note telling the model to suggest branch names, PR checklist items, and minimal tests. -->
+
 Examples:
 
 - TASK: "Refactor payment module, add tests" → COPILOT

@@ -11,6 +11,7 @@ This PR introduces a production-grade file-backed logging architecture for the M
 - Acceptance test harness (`features/support/world.cjs` and `features/step_definitions/tools.steps.cjs`) now write `cucumber-verbose.log` into `LOG_DIR` when `LOG_MCP=1`.
 - Created `docs/LOGGING.md` documenting log locations and env vars.
 - Added `.env.example` and updated local `.env` for development guidance.
+ - Introduced the Cucumber acceptance test suite and supporting files (features, step definitions, and support code). The test suite exercises the MCP tools and runs the acceptance scenarios used during validation.
 
 ## Testing
 
@@ -18,6 +19,11 @@ This PR introduces a production-grade file-backed logging architecture for the M
   - `$env:LOG_MCP = '1'; npm run acceptance:logging`
   - Verified `mcp-starter/logs/mcp-<DATE>.log` and `mcp-starter/logs/cucumber-verbose.log` are created and populated.
 - Lint pass for edited files.
+
+Additional test notes
+
+- The repository includes a Cucumber-based acceptance suite under `features/` with support code in `features/support/` and step definitions in `features/step_definitions/`.
+- Running `npm run acceptance` executes the suite. Use `npm run acceptance:logging` or set `LOG_MCP=1` for verbose test logs written to `LOG_DIR`.
 
 ## Checklist
 
