@@ -11,9 +11,11 @@ Write-Host "Running acceptance smoke locally with LOG_MCP=1. Logs will be in: $l
 Set-Location -Path (Join-Path -Path $PSScriptRoot -ChildPath '..\mcp-starter')
 
 $env:LOG_MCP = '1'
-npm ci
+# Install at repo root so root devDependencies (e.g., Cucumber) are available
+npm ci --prefix ..
 try {
-    npm run acceptance
+    # Run acceptance from repo root using --prefix so scripts in root package.json are used
+    npm --prefix .. run acceptance
 } catch {
     Write-Host "Acceptance run failed. See logs in $logDir"
     exit 1

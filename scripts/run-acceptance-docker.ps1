@@ -18,7 +18,8 @@ Write-Host "Log directory (host): $logDir"
 Write-Host "Creating container to run acceptance tests..."
 
 # Use docker create with --entrypoint /bin/sh and pass -c "..." to run npm commands inside the container
-$createOutput = docker create --entrypoint '/bin/sh' -e LOG_MCP=1 -e LOG_DIR=/app/mcp-starter/logs spellbook-mcp:ci -c "cd /app && npm --prefix /app/mcp-starter ci --omit=dev && cd /app && npm run acceptance" 2>&1
+# Use the test image (spellbook-mcp:test) so devDependencies (Cucumber) are already installed
+$createOutput = docker create --entrypoint '/bin/sh' -e LOG_MCP=1 -e LOG_DIR=/app/mcp-starter/logs spellbook-mcp:test -c "cd /app && npm --prefix /app/mcp-starter ci --omit=dev && cd /app && npm --prefix /app/mcp-starter run acceptance" 2>&1
 if ($LASTEXITCODE -ne 0 -or -not $createOutput) {
     Write-Host "docker create failed:";
     Write-Host $createOutput
