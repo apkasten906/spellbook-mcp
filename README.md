@@ -76,3 +76,14 @@ See **PROMPT_EXECUTION_MATRIX.md**. Prefer Copilot (GPT‑5 Codex) for code, use
 ## Commands
 
 See **COMMANDS.md** for slash commands and how they map to MCP tools.
+
+## Learning & postmortems
+
+We keep a lightweight team learning log for acceptance/CI failures and important troubleshooting notes. If an acceptance test or CI run reveals a bug, flaky test, or operational lesson, add a short entry to `docs/learning-log.md` describing:
+
+- The run id or timestamp and branch/PR affected
+- Short summary of the issue and root cause (if known)
+- Steps taken to investigate and the final remediation
+- References to commits, artifacts (uploaded `mcp-starter/logs/**`), and PRs
+
+Keeping this information close to the repo helps accelerate future debugging and captures institutional knowledge. The `prompts/v0.3.0/meta/` directory also contains policy artifacts like `due_diligence_checklist.md` and `retrospective_review.md` you can reference when filing learnings.
