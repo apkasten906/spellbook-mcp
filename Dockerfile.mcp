@@ -10,7 +10,7 @@ COPY mcp-starter/package.json ./mcp-starter/package.json
 
 # Install all deps (including dev) in the test image for CI test runs
 # Install root deps, then install the mcp-starter app deps so runtime code (winston, etc.) is present
-RUN npm ci --quiet && cd mcp-starter && npm ci --quiet
+RUN npm ci --quiet && cd mcp-starter && npm install --quiet
 
 # Copy the rest of the repo into the test image
 COPY . .
