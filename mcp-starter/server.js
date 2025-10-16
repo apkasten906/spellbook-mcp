@@ -16,6 +16,7 @@ import {
 import fg from 'fast-glob';
 
 import { info as logMessage, debug as logDebug } from './lib/logger.mjs';
+import { createShutdown } from './lib/graceful-shutdown.mjs';
 
 const LOG_MCP = process.env.LOG_MCP === '1' || process.env.LOG_MCP === 'true' || process.env.LOG_MCP === 'yes' || process.env.LOG_MCP === 'on';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -51,17 +52,10 @@ const server = new Server(
   }
 );
 
-const shutdown = async (signal) => {
-  // Always write shutdown message to stderr so orchestration sees it
-  console.error(`Received ${signal}. Shutting down...`);
-  try {
-    await server?.close?.();
-  } finally {
-    process.exit(0);
-  }
-};
-process.on('SIGINT', () => shutdown('SIGINT'));
-process.on('SIGTERM', () => shutdown('SIGTERM'));
+// Create a shutdown controller and install default signal handlers.
+// For tests we can import createShutdown and call shutdown directly.
+const { installHandlers } = createShutdown(server);
+installHandlers();
 
 // Define tools
 const tools = [

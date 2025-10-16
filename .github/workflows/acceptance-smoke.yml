@@ -49,6 +49,33 @@ jobs:
             mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
           fi
 
+      - name: Run unit tests inside Docker test image
+        id: unit-tests
+        env:
+          LOG_MCP: '1'
+          LOG_DIR: '/app/mcp-starter/logs'
+        run: |
+          set -euo pipefail
+          mkdir -p mcp-starter/logs
+
+          # create a container from the test image and run the unit test script
+          CONTAINER_ID=$(docker create --entrypoint '/bin/sh' -e LOG_MCP=1 -e LOG_DIR=/app/mcp-starter/logs spellbook-mcp:test -c "cd /app && npm run test:unit")
+          echo "Created unit-test container: $CONTAINER_ID"
+          docker start -a "$CONTAINER_ID" || true
+
+          # copy logs back if any
+          mkdir -p mcp-starter/logs
+          docker cp "${CONTAINER_ID}:/app/mcp-starter/logs/." mcp-starter/logs/ || true
+
+          EXIT_CODE=$(docker inspect "$CONTAINER_ID" --format='{{.State.ExitCode}}') || true
+          echo "Unit tests container exit code: $EXIT_CODE"
+          docker rm "$CONTAINER_ID" >/dev/null || true
+
+          if [ "$EXIT_CODE" -ne 0 ]; then
+            echo "Unit tests failed with exit code $EXIT_CODE"
+            exit $EXIT_CODE
+          fi
+
       - name: Run quick-smoke then full acceptance inside Docker
         id: acceptance
         env:
