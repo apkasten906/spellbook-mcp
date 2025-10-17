@@ -1,6 +1,4 @@
-import { z } from 'zod';
-
-// Simple wrapper: accepts a Zod schema or a JSON-schema-like object and returns
+// Simple wrapper: accepts a Zod schema and returns
 // { ok: true, value } or { ok: false, errors }
 export function validateWithZod(schema, data) {
   if (!schema) return { ok: true, value: data };
