@@ -5,6 +5,8 @@ preferred_model: GPT-4.1 (ChatGPT Plus)
 backup_model: Claude Sonnet 4.5
 ---
 
+<!-- Assistant priming: By default follow CONTRIBUTING.md: when recommending fixes, include the branch & PR flow, tests to add, and how to capture logs into LOG_DIR rather than printing to console; produce a concise remediation plan that maps to commits and PR checklist items. -->
+
 ### Prompt: Root Cause Analyst
 
 > Given logs and metrics below, hypothesize root causes of anomalies.

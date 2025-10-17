@@ -23,6 +23,21 @@ docker build -f Dockerfile.mcp -t spellbook-mcp:0.3.0 .
 docker run --rm -it spellbook-mcp:0.3.0
 ```
 
+### Local acceptance smoke (PowerShell)
+
+If you want to run the quick acceptance smoke locally inside Docker (mirrors CI), use the included PowerShell helper or the npm `smoketest` script:
+
+```powershell
+# Build a local image
+docker build -f Dockerfile.mcp -t spellbook-mcp:local .
+
+# Run the smoke test with mounted logs directory (writes to ./mcp-starter/logs)
+docker run --rm -it -v ${PWD}\mcp-starter\logs:/app/mcp-starter/logs spellbook-mcp:local /bin/sh -c "cd /app && npm run acceptance:quick:logging"
+
+# Or use the included helper that wraps the same logic
+npm run smoketest
+```
+
 ### MCP Client Setup
 
 Point your MCP-enabled client (Claude desktop, Cursor, VS Code MCP bridge) at **.mcp.json**.
@@ -76,3 +91,14 @@ See **PROMPT_EXECUTION_MATRIX.md**. Prefer Copilot (GPT‑5 Codex) for code, use
 ## Commands
 
 See **COMMANDS.md** for slash commands and how they map to MCP tools.
+
+## Learning & postmortems
+
+We keep a lightweight team learning log for acceptance/CI failures and important troubleshooting notes. If an acceptance test or CI run reveals a bug, flaky test, or operational lesson, add a short entry to `docs/learning-log.md` describing:
+
+- The run id or timestamp and branch/PR affected
+- Short summary of the issue and root cause (if known)
+- Steps taken to investigate and the final remediation
+- References to commits, artifacts (uploaded `mcp-starter/logs/**`), and PRs
+
+Keeping this information close to the repo helps accelerate future debugging and captures institutional knowledge. The `prompts/v0.3.0/meta/` directory also contains policy artifacts like `due_diligence_checklist.md` and `retrospective_review.md` you can reference when filing learnings.

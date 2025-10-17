@@ -16,6 +16,7 @@ import {
 import fg from 'fast-glob';
 
 import { info as logMessage, debug as logDebug } from './lib/logger.mjs';
+import { createShutdown } from './lib/graceful-shutdown.mjs';
 
 const LOG_MCP = process.env.LOG_MCP === '1' || process.env.LOG_MCP === 'true' || process.env.LOG_MCP === 'yes' || process.env.LOG_MCP === 'on';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -51,17 +52,10 @@ const server = new Server(
   }
 );
 
-const shutdown = async (signal) => {
-  // Always write shutdown message to stderr so orchestration sees it
-  console.error(`Received ${signal}. Shutting down...`);
-  try {
-    await server?.close?.();
-  } finally {
-    process.exit(0);
-  }
-};
-process.on('SIGINT', () => shutdown('SIGINT'));
-process.on('SIGTERM', () => shutdown('SIGTERM'));
+// Create a shutdown controller and install default signal handlers.
+// For tests we can import createShutdown and call shutdown directly.
+const { installHandlers } = createShutdown(server);
+installHandlers();
 
 // Define tools
 const tools = [
@@ -344,11 +338,12 @@ ${phaseSection}
 }
 
 async function handleDueCheck(args = {}) {
-  const base = args.path
-    ? path.resolve(promptsRoot, '..', args.path)
-    : path.resolve(promptsRoot, '..');
+  // Resolve the base path relative to the repository root (promptsRoot).
+  // Previous code used promptsRoot's parent which caused glob to scan outside the repo
+  // and could take a very long time or hit permission errors. Use promptsRoot here.
+  const base = args.path ? path.resolve(promptsRoot, args.path) : path.resolve(promptsRoot);
 
-  assertInside(path.resolve(promptsRoot, '..'), base);
+  assertInside(path.resolve(promptsRoot), base);
 
   const strict = !!args?.strict;
   const format = args?.format || 'md';
@@ -584,7 +579,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   logMessage('[MCP] Tool call:', name, 'args:', args);
   try {
     let result;
-    logMessage('[MCP] Received request:', request);
     switch (name) {
       case 'prompt_read':
         result = await handlePromptRead(args); break;
@@ -611,7 +605,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
     }
-    logMessage('[MCP] Sending response for', name, result);
     logMessage('[MCP] Tool result for', name, result);
     return result;
   } catch (error) {

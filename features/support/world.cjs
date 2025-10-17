@@ -14,7 +14,7 @@ class TestWorld {
       const path = require('path');
       // Prefer an explicit LOG_DIR if provided, otherwise default to mcp-starter/logs
       const logDir = process.env.LOG_DIR || path.resolve(__dirname, '..', 'mcp-starter', 'logs');
-      try { fs.mkdirSync(logDir, { recursive: true }); } catch (e) { /* ignore */ }
+  try { fs.mkdirSync(logDir, { recursive: true }); } catch (e) { console.warn('[TestWorld] mkdirSync failed:', e && e.message); }
 
       // Only announce the verbose log path once per test run
       if (!global.__TESTWORLD_VERBOSE_ANNOUNCED) {
@@ -51,6 +51,22 @@ class TestWorld {
       }
       this.client = new McpClient(this.mcpCmd, this.mcpArgs, { env: testEnv });
       await this.client.start();
+      // Write a tiny placeholder artifact so CI uploads are reliable even on early failures.
+      // This file is safe to create and helps debugging when tests crash before writing logs.
+      try {
+        if (testEnv.LOG_MCP === '1') {
+          const fs = require('fs');
+          const path = require('path');
+          const logDir = testEnv.LOG_DIR || path.resolve(__dirname, '..', 'mcp-starter', 'logs');
+          try { fs.mkdirSync(logDir, { recursive: true }); } catch (e) { console.warn('[TestWorld] mkdirSync failed:', e && e.message); }
+          const markerPath = path.join(logDir, 'artifact-ready.txt');
+          const payload = `${new Date().toISOString()} - artifact-ready: tests starting (branch: ${process.env.GITHUB_REF || 'local'})\n`;
+          try { fs.writeFileSync(markerPath, payload, { flag: 'w' }); } catch (e) { console.warn('[TestWorld] Could not write artifact-ready marker:', e && e.message); }
+        }
+      } catch (e) {
+        // Best-effort only; don't fail tests for this
+        console.warn('[TestWorld] artifact-ready marker write failed', e && e.message);
+      }
       // Announce server-side MCP log path from parent process (avoids PowerShell RemoteException)
       if (testEnv.LOG_MCP === '1' && !global.__MCP_LOG_ANNOUNCED) {
         // Announce the server log directory so users can find rotated files

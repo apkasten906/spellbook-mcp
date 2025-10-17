@@ -5,6 +5,8 @@ preferred_model: GPT-5 (ChatGPT Web)
 backup_model: Gemini 2.5 Pro
 ---
 
+<!-- Assistant priming: Follow CONTRIBUTING.md defaults: recommend branching and commit naming, include CI and test considerations, and prefer non-verbose logging patterns. When recommending architecture, also include steps to make changes safely (feature branches, migration plan, tests). -->
+
 ### Prompt: System Blueprint
 
 > Design an architecture for {{system_name}} that satisfies:

@@ -5,6 +5,8 @@ preferred_model: GPT-4.1 (ChatGPT Plus)
 backup_model: GPT-5 Codex
 ---
 
+<!-- Assistant priming: Follow CONTRIBUTING.md by default: prefer tests with clear setup/teardown, include CI guidance, and avoid noisy console output (use LOG_MCP for verbose logs). When generating tests, also include minimal CI job snippets and where to place tests in the repo. -->
+
 ### Prompt: Unit Test Generator
 
 > For the provided module, generate complete unit tests with:
