@@ -1,5 +1,7 @@
 # E2E smoke tests (headless)
 
+**Status:** In Progress
+
 **Goal:** Ensure server boots and tools respond with valid JSON-RPC.
 
 ## Tasks

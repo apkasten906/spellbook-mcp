@@ -1,5 +1,7 @@
 # Contributing guide & issue templates
 
+**Status:** In Progress
+
 **Goal:** Make contributions easy and consistent.
 
 ## Tasks

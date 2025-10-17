@@ -1,5 +1,7 @@
 # Server telemetry & logging
 
+**Status:** In Progress
+
 **Goal:** Structured logs and optional progress notifications.
 
 ## Tasks

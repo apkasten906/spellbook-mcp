@@ -1,5 +1,7 @@
 # Plan release v0.4.0
 
+**Status:** In Progress
+
 **Date:** 2025-10-14
 
 ## Highlights

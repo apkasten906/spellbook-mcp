@@ -1,5 +1,7 @@
 # Add `*_write` variants to persist docs
 
+**Status:** In Progress
+
 **Goal:** Tools optionally write artifacts to repo (`docs/`), returning the path and content.
 
 ## Scope
