@@ -19,7 +19,7 @@ Provide a concise description of the change and the problem it solves.
 - [ ] I updated relevant documentation (README, docs/)
 - [ ] I added or updated any necessary environment examples (`.env.example`)
 - [ ] This PR follows the branching policy: feature has its own `feat/*` branch; story/topic branches were merged into the feature branch
- 
+
 Branch naming guidance
 
 - Feature branches: `feat/<short-description>`

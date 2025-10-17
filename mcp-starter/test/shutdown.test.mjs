@@ -4,7 +4,11 @@ import { createShutdown } from '../lib/graceful-shutdown.mjs';
 
 test('shutdown is idempotent', async () => {
   let closed = 0;
-  const fakeServer = { close: async () => { closed += 1; } };
+  const fakeServer = {
+    close: async () => {
+      closed += 1;
+    },
+  };
 
   const logs = [];
   const origErr = console.error;

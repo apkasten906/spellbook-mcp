@@ -15,10 +15,10 @@ We use **GitHub Flow** and **SemVer**.
 - Bugfixes should use `fix/<short-description>` and be targeted to `dev` (or the active feature branch, if the fix is feature-specific).
 - Keep PRs small and focused: prefer multiple small PRs on story/topic branches that merge into the feature branch.
 - Example flow:
-	 1. Create `feat/notifications` for a new notifications feature.
-	 2. Create `feat/notifications/story-email` and `feat/notifications/story-ui` for separate stories.
-	 3. Open PRs from the story branches into `feat/notifications`.
-	 4. Once feature is complete, open PR from `feat/notifications` into `dev`.
+  1. Create `feat/notifications` for a new notifications feature.
+  2. Create `feat/notifications/story-email` and `feat/notifications/story-ui` for separate stories.
+  3. Open PRs from the story branches into `feat/notifications`.
+  4. Once feature is complete, open PR from `feat/notifications` into `dev`.
 
 Enforcing this policy improves reviewability and keeps `dev` stable while features are in progress.
 

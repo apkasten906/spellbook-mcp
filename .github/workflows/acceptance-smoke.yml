@@ -2,9 +2,9 @@ name: Acceptance Smoke
 
 on:
   push:
-    branches: [ dev, ci/acceptance-smoke ]
+    branches: [dev, ci/acceptance-smoke]
   pull_request:
-    branches: [ dev ]
+    branches: [dev]
 
 jobs:
   acceptance-smoke:
@@ -65,8 +65,8 @@ jobs:
       - name: Run unit tests inside Docker test image
         id: unit-tests
         env:
-          LOG_MCP: '1'
-          LOG_DIR: '/app/mcp-starter/logs'
+          LOG_MCP: "1"
+          LOG_DIR: "/app/mcp-starter/logs"
         run: |
           set -euo pipefail
           mkdir -p mcp-starter/logs
@@ -93,8 +93,8 @@ jobs:
       - name: Run quick-smoke then full acceptance inside Docker
         id: acceptance
         env:
-          LOG_MCP: '1'
-          LOG_DIR: '/app/mcp-starter/logs'
+          LOG_MCP: "1"
+          LOG_DIR: "/app/mcp-starter/logs"
         run: |
           set -euo pipefail
           mkdir -p mcp-starter/logs

@@ -3,7 +3,9 @@ export function createShutdown(server, { exit = (code) => process.exit(code) } =
 
   const shutdown = async (signal) => {
     if (_shutdownInProgress) {
-      console.error(`Shutdown already in progress (received ${signal}); ignoring duplicate signal.`);
+      console.error(
+        `Shutdown already in progress (received ${signal}); ignoring duplicate signal.`
+      );
       return;
     }
     _shutdownInProgress = true;
