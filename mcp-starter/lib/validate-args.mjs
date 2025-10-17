@@ -6,6 +6,7 @@ export function validateWithZod(schema, data) {
     const result = schema.parse(data);
     return { ok: true, value: result };
   } catch (e) {
-    return { ok: false, errors: e.errors || [{ message: e.message }] };
+    const errs = e?.errors ?? e?.issues ?? [{ message: String(e?.message ?? e) }];
+    return { ok: false, errors: errs };
   }
 }
