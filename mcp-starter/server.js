@@ -17,6 +17,8 @@ import fg from 'fast-glob';
 
 import { info as logMessage, debug as logDebug } from './lib/logger.mjs';
 import { createShutdown } from './lib/graceful-shutdown.mjs';
+import { generateDueCheck } from './lib/due_check.mjs';
+import { generatePdca } from './lib/pdca.mjs';
 
 const LOG_MCP = process.env.LOG_MCP === '1' || process.env.LOG_MCP === 'true' || process.env.LOG_MCP === 'yes' || process.env.LOG_MCP === 'on';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -286,108 +288,24 @@ async function handlePromptCommands() {
 }
 
 async function handlePDCAGenerate(args = {}) {
-  const { phase, artifact, scope = 'feature', metrics = '', risk = 'low' } = args;
-  let phaseSection = '';
-  if (phase === 'plan') {
-    phaseSection = `## Hypothesis
-- …
-
-## Metrics
-- …
-
-## Risks & Mitigations
-- …
-`;
-  } else if (phase === 'do') {
-    phaseSection = `## Change Set
-- …
-
-## Test Evidence
-- …
-
-## Rollback Plan
-- …
-`;
-  } else if (phase === 'check') {
-    phaseSection = `## Findings
-- …
-
-## Data (table/snippets)
-- …
-
-## Decision
-- Proceed / Adjust / Rollback (why)
-`;
-  } else {
-    phaseSection = `## Actions
-- Owner: …  Due: …
-- …
-
-## Runbook / Prompt Updates
-- …
-`;
+  try {
+    const md = generatePdca(args);
+    return { content: [{ type: 'text', text: md }] };
+  } catch (err) {
+    throw new McpError(ErrorCode.InvalidParams, String(err?.message ?? err));
   }
-
-  const md = `# PDCA · ${phase.toUpperCase()} · ${artifact}
-
-**Scope:** ${scope}  |  **Risk:** ${risk}  |  **Metrics:** ${metrics || '—'}
-
-${phaseSection}
-`;
-  return { content: [{ type: 'text', text: md }] };
 }
 
 async function handleDueCheck(args = {}) {
-  // Resolve the base path relative to the repository root (promptsRoot).
-  // Previous code used promptsRoot's parent which caused glob to scan outside the repo
-  // and could take a very long time or hit permission errors. Use promptsRoot here.
-  const base = args.path ? path.resolve(promptsRoot, args.path) : path.resolve(promptsRoot);
-
-  assertInside(path.resolve(promptsRoot), base);
-
-  const strict = !!args?.strict;
-  const format = args?.format || 'md';
-
-  // very light repo checks
-  const patterns = [
-    '**/*.{test,spec}.{js,jsx,ts,tsx}',
-    '**/README.md',
-    '**/CHANGELOG.md',
-    '**/.github/**/*',
-  ];
-  const found = {};
-  for (const p of patterns) {
-    const files = await fg(p, { cwd: base, dot: true, onlyFiles: true });
-    found[p] = files.length;
+  try {
+    const { report, md, format } = await generateDueCheck(promptsRoot, args);
+    if (format === 'json') {
+      return { content: [{ type: 'text', text: JSON.stringify(report, null, 2) }] };
+    }
+    return { content: [{ type: 'text', text: md }] };
+  } catch (err) {
+    throw new McpError(ErrorCode.InvalidParams, String(err?.message ?? err));
   }
-
-  const report = {
-    path: base,
-    checks: {
-      tests_present: found['**/*.{test,spec}.{js,jsx,ts,tsx}'] > 0,
-      readme_present: found['**/README.md'] > 0,
-      changelog_present: found['**/CHANGELOG.md'] > 0,
-      github_meta: found['**/.github/**/*'] > 0,
-    },
-    notes: strict ? ['Strict mode: enforce all checks before merge.'] : [],
-  };
-
-  if (format === 'json') {
-    return { content: [{ type: 'text', text: JSON.stringify(report, null, 2) }] };
-  }
-
-  const md = `# Due Diligence Report
-
-**Path:** ${report.path}
-
-- Tests present: ${report.checks.tests_present ? '✅' : '❌'}
-- README present: ${report.checks.readme_present ? '✅' : '❌'}
-- CHANGELOG present: ${report.checks.changelog_present ? '✅' : '❌'}
-- .github meta present: ${report.checks.github_meta ? '✅' : '❌'}
-
-${strict ? '> **Strict:** all checks required before merge.\n' : ''}
-`;
-  return { content: [{ type: 'text', text: md }] };
 }
 
 async function handleRetroCreate(args = {}) {

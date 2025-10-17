@@ -24,3 +24,9 @@
 /labels enhancement, mcp, v0.3.0
 /assignees @apkasten906
 /milestone 0.4.0
+
+## Progress
+
+- Added `mcp-starter/lib/pdca.mjs` and `mcp-starter/test/pdca.test.mjs`.
+- Updated `server.js` to call into `generatePdca` helper for `pdca_generate`.
+- Local unit tests (`npm run test:unit` inside `mcp-starter`) run shutdown and pdca tests and are passing locally.

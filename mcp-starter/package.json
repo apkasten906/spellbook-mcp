@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test:unit": "node test/shutdown.test.mjs"
+    "test:unit": "node test/shutdown.test.mjs && node test/pdca.test.mjs && node test/due_check.test.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.0",
