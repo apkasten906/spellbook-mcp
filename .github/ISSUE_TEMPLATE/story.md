@@ -3,7 +3,7 @@ name: Story
 about: Describe a user story with acceptance criteria and definition of done
 title: "Story: "
 labels: story
-assignees: ''
+assignees: ""
 ---
 
 ### Summary

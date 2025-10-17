@@ -19,8 +19,15 @@ import { info as logMessage, debug as logDebug } from './lib/logger.mjs';
 import { createShutdown } from './lib/graceful-shutdown.mjs';
 import { generateDueCheck } from './lib/due_check.mjs';
 import { generatePdca } from './lib/pdca.mjs';
+import { normalizeToolName } from './lib/aliases.mjs';
+import { jsonSchemaToZod } from './lib/schema-to-zod.mjs';
+import { validateWithZod } from './lib/validate-args.mjs';
 
-const LOG_MCP = process.env.LOG_MCP === '1' || process.env.LOG_MCP === 'true' || process.env.LOG_MCP === 'yes' || process.env.LOG_MCP === 'on';
+const LOG_MCP =
+  process.env.LOG_MCP === '1' ||
+  process.env.LOG_MCP === 'true' ||
+  process.env.LOG_MCP === 'yes' ||
+  process.env.LOG_MCP === 'on';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const promptsRoot = path.resolve(__dirname, '..');
 
@@ -493,33 +500,57 @@ _Text-first sketch_
 }
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { name, arguments: args } = request.params;
-  logMessage('[MCP] Tool call:', name, 'args:', args);
+  const { name: rawName } = request.params;
+  let args = request.params.arguments;
+  const name = normalizeToolName(rawName);
+  logMessage('[MCP] Tool call:', rawName, '->', name, 'args:', args);
   try {
+    // find tool schema and validate
+    const tool = tools.find((t) => t.name === name);
+    if (tool && tool.inputSchema) {
+      const zschema = jsonSchemaToZod(tool.inputSchema);
+      const validation = validateWithZod(zschema, args || {});
+      if (!validation.ok) {
+        throw new McpError(ErrorCode.InvalidParams, `Invalid arguments: ${JSON.stringify(validation.errors)}`);
+      }
+      // use parsed args
+      args = validation.value;
+    }
     let result;
     switch (name) {
       case 'prompt_read':
-        result = await handlePromptRead(args); break;
+        result = await handlePromptRead(args);
+        break;
       case 'prompt_list':
-        result = await handlePromptList(args); break;
+        result = await handlePromptList(args);
+        break;
       case 'prompt_commands':
-        result = await handlePromptCommands(); break;
+        result = await handlePromptCommands();
+        break;
       case 'pdca_generate':
-        result = await handlePDCAGenerate(args); break;
+        result = await handlePDCAGenerate(args);
+        break;
       case 'due_check':
-        result = await handleDueCheck(args); break;
+        result = await handleDueCheck(args);
+        break;
       case 'retro_create':
-        result = await handleRetroCreate(args); break;
+        result = await handleRetroCreate(args);
+        break;
       case 'api_scaffold':
-        result = await handleApiScaffold(args); break;
+        result = await handleApiScaffold(args);
+        break;
       case 'ci_configure':
-        result = await handleCIConfigure(args); break;
+        result = await handleCIConfigure(args);
+        break;
       case 'tests_plan':
-        result = await handleTestsPlan(args); break;
+        result = await handleTestsPlan(args);
+        break;
       case 'rca_analyze':
-        result = await handleRCAAnalyze(args); break;
+        result = await handleRCAAnalyze(args);
+        break;
       case 'arch_adr':
-        result = await handleArchADR(args); break;
+        result = await handleArchADR(args);
+        break;
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
     }

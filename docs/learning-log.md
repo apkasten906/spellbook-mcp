@@ -14,12 +14,14 @@ This document captures learnings from defects, incidents, and debugging sessions
 ### Error Context
 
 All Cucumber acceptance tests timing out with no response from MCP server:
+
 - 24/24 scenarios failing with "function timed out, ensure the promise resolves within 5000 milliseconds"
 - Custom MCP client sending requests to server's stdin
 - Server starting successfully but never processing requests
 - No error messages or exceptions, just silent timeouts
 
 **Environment:**
+
 - Node.js v24.5.0
 - Windows 11
 - @modelcontextprotocol/sdk version 2025.x
@@ -30,6 +32,7 @@ All Cucumber acceptance tests timing out with no response from MCP server:
 **Primary Issue:** MCP server was missing the `InitializeRequestSchema` handler, which is required by the Model Context Protocol for proper client-server handshake.
 
 **Technical Details:**
+
 - MCP protocol requires clients to send an `initialize` request before any other operations
 - Server must respond to initialization with protocol version and capabilities
 - Our server only implemented `ListToolsRequestSchema` and `CallToolRequestSchema` handlers
@@ -53,18 +56,19 @@ All Cucumber acceptance tests timing out with no response from MCP server:
 **Changes Made:**
 
 1. **Added initialization handler to `mcp-starter/server.js`:**
+
    ```javascript
-   import { InitializeRequestSchema } from '@modelcontextprotocol/sdk/types.js';
-   
+   import { InitializeRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+
    server.setRequestHandler(InitializeRequestSchema, async (request) => {
      return {
-       protocolVersion: '2024-11-05',
+       protocolVersion: "2024-11-05",
        capabilities: {
          tools: {},
        },
        serverInfo: {
-         name: 'spellbook-mcp',
-         version: '0.3.0',
+         name: "spellbook-mcp",
+         version: "0.3.0",
        },
      };
    });
@@ -80,6 +84,7 @@ All Cucumber acceptance tests timing out with no response from MCP server:
    - Added missing step definition for "I should receive the contents of COMMANDS.md"
 
 **Files Modified:**
+
 - `mcp-starter/server.js` - Added InitializeRequestSchema handler
 - `features/support/mcp-client.cjs` - Complete rewrite to use official SDK
 - `features/support/world.cjs` - Simplified client lifecycle management
@@ -121,6 +126,7 @@ All Cucumber acceptance tests timing out with no response from MCP server:
 ### Related Components
 
 **Modified Files:**
+
 - `mcp-starter/server.js` - Core server implementation
 - `features/support/mcp-client.cjs` - Test client wrapper
 - `features/support/world.cjs` - Cucumber world context
@@ -140,6 +146,7 @@ All Cucumber acceptance tests timing out with no response from MCP server:
 ### Additional Notes
 
 This issue highlighted the importance of:
+
 - Following protocol specifications completely
 - Using official implementations when available
 - Adding diagnostic logging at system boundaries
@@ -148,4 +155,3 @@ This issue highlighted the importance of:
 The debugging process itself was valuable for understanding the MCP protocol's initialization sequence and the importance of proper client-server handshake.
 
 ---
-

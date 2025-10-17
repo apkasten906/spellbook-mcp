@@ -4,15 +4,15 @@ let Client, StdioClientTransport;
 // Dynamic import workaround for ESM in CommonJS
 async function loadMcpSdk() {
   if (!Client) {
-    const clientModule = await import('@modelcontextprotocol/sdk/client/index.js');
-    const transportModule = await import('@modelcontextprotocol/sdk/client/stdio.js');
+    const clientModule = await import("@modelcontextprotocol/sdk/client/index.js");
+    const transportModule = await import("@modelcontextprotocol/sdk/client/stdio.js");
     Client = clientModule.Client;
     StdioClientTransport = transportModule.StdioClientTransport;
   }
 }
 
 class McpClient {
-  constructor(cmd = 'node', args = ['server.js'], opts = {}) {
+  constructor(cmd = "node", args = ["server.js"], opts = {}) {
     this.cmd = cmd;
     this.args = args;
     this.env = { ...process.env, ...opts.env };
@@ -28,15 +28,18 @@ class McpClient {
     this.transport = new StdioClientTransport({
       command: this.cmd,
       args: this.args,
-      env: this.env
+      env: this.env,
     });
 
-    this.client = new Client({
-      name: 'cucumber-test-client',
-      version: '1.0.0'
-    }, {
-      capabilities: {}
-    });
+    this.client = new Client(
+      {
+        name: "cucumber-test-client",
+        version: "1.0.0",
+      },
+      {
+        capabilities: {},
+      },
+    );
 
     await this.client.connect(this.transport);
   }
@@ -51,14 +54,14 @@ class McpClient {
 
   async callTool(name, args) {
     if (!this.client) {
-      throw new Error('Client not started');
+      throw new Error("Client not started");
     }
     return await this.client.callTool({ name, arguments: args });
   }
 
   async listTools() {
     if (!this.client) {
-      throw new Error('Client not started');
+      throw new Error("Client not started");
     }
     return await this.client.listTools();
   }

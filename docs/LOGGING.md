@@ -50,4 +50,3 @@ Notes & troubleshooting
 - We intentionally avoid printing large amounts of detailed protocol logs to child stderr because PowerShell wraps those in RemoteException metadata; verbose logs are written to files and the parent prints concise announcements.
 
 - If you prefer a different log layout, retention policy, or to centralize logs at the repo root, set `LOG_DIR` to the desired path (for example, set `LOG_DIR=..\logs` from `mcp-starter` to move logs up one level).
-

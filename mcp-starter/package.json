@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-  "test": "vitest",
-  "test:unit": "vitest run",
+    "test": "vitest",
+    "test:unit": "vitest run",
     "deps:install": "npm install --no-audit --no-fund"
   },
   "dependencies": {
@@ -22,6 +22,9 @@
   "vitest": {
     "globals": false,
     "testTimeout": 20000,
-    "include": ["test/**/*.test.mjs", "test/**/*.spec.mjs"]
+    "include": [
+      "test/**/*.test.mjs",
+      "test/**/*.spec.mjs"
+    ]
   }
 }
