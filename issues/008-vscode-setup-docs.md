@@ -1,5 +1,7 @@
 # VS Code setup doc
 
+**Status:** In Progress
+
 **Goal:** Contributor-focused instructions to add the server via "MCP: Add Servers…".
 
 ## Contents

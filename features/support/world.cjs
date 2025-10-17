@@ -12,8 +12,8 @@ class TestWorld {
     if (testEnv.LOG_MCP === '1') {
       const fs = require('fs');
       const path = require('path');
-      // Prefer an explicit LOG_DIR if provided, otherwise default to mcp-starter/logs
-      const logDir = process.env.LOG_DIR || path.resolve(__dirname, '..', 'mcp-starter', 'logs');
+  // Prefer an explicit LOG_DIR if provided, otherwise default to repo-root/mcp-starter/logs
+  const logDir = process.env.LOG_DIR || path.resolve(__dirname, '..', '..', 'mcp-starter', 'logs');
   try { fs.mkdirSync(logDir, { recursive: true }); } catch (e) { console.warn('[TestWorld] mkdirSync failed:', e && e.message); }
 
       // Only announce the verbose log path once per test run
@@ -57,7 +57,7 @@ class TestWorld {
         if (testEnv.LOG_MCP === '1') {
           const fs = require('fs');
           const path = require('path');
-          const logDir = testEnv.LOG_DIR || path.resolve(__dirname, '..', 'mcp-starter', 'logs');
+          const logDir = testEnv.LOG_DIR || path.resolve(__dirname, '..', '..', 'mcp-starter', 'logs');
           try { fs.mkdirSync(logDir, { recursive: true }); } catch (e) { console.warn('[TestWorld] mkdirSync failed:', e && e.message); }
           const markerPath = path.join(logDir, 'artifact-ready.txt');
           const payload = `${new Date().toISOString()} - artifact-ready: tests starting (branch: ${process.env.GITHUB_REF || 'local'})\n`;
@@ -70,7 +70,7 @@ class TestWorld {
       // Announce server-side MCP log path from parent process (avoids PowerShell RemoteException)
       if (testEnv.LOG_MCP === '1' && !global.__MCP_LOG_ANNOUNCED) {
         // Announce the server log directory so users can find rotated files
-        const logDir = testEnv.LOG_DIR || require('path').resolve(__dirname, '..', 'mcp-starter', 'logs');
+  const logDir = testEnv.LOG_DIR || require('path').resolve(__dirname, '..', '..', 'mcp-starter', 'logs');
         console.log(`[MCP] Server log directory: ${logDir} (files: mcp-<DATE>.log, mcp-error-<DATE>.log)`);
         global.__MCP_LOG_ANNOUNCED = true;
       }

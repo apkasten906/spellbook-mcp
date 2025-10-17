@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test:unit": "node test/shutdown.test.mjs"
+  "test": "vitest",
+  "test:unit": "vitest run",
+    "deps:install": "npm install --no-audit --no-fund"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.0",
@@ -13,5 +15,13 @@
     "zod": "^3.25.76",
     "winston": "^3.9.0",
     "winston-daily-rotate-file": "^4.7.1"
+  },
+  "devDependencies": {
+    "vitest": "^1.1.4"
+  },
+  "vitest": {
+    "globals": false,
+    "testTimeout": 20000,
+    "include": ["test/**/*.test.mjs", "test/**/*.spec.mjs"]
   }
 }

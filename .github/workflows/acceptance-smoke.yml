@@ -14,6 +14,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Cache mcp-starter node_modules
+        uses: actions/cache@v4
+        with:
+          path: mcp-starter/node_modules
+          key: mcp-starter-node-modules-${{ runner.os }}-v1-${{ hashFiles('mcp-starter/package-lock.json') }}
+          restore-keys: |
+            mcp-starter-node-modules-${{ runner.os }}-v1-
+
+      - name: Install mcp-starter dev dependencies on runner
+        run: |
+          cd mcp-starter
+          npm run deps:install
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 

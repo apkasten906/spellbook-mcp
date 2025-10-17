@@ -1,5 +1,7 @@
 # CI/CD & quality gates
 
+**Status:** In Progress
+
 **Goal:** Add ready-to-use CI for lint, tests, security scan; drafts for other providers.
 
 ## Tasks

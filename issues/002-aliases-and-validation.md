@@ -1,5 +1,7 @@
 # Add aliases + input validation
 
+**Status:** In Progress
+
 **Goal:** Support legacy dotted tool names and improve arg validation UX.
 
 ## Tasks

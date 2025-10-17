@@ -1,5 +1,7 @@
 # Expand prompt library under `prompts/v0.3.0`
 
+**Status:** In Progress
+
 **Goal:** Ship curated prompts per SDLC step with PDCA overlay and model routing hints.
 
 ## Tasks
