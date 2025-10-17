@@ -19,6 +19,7 @@ import { info as logMessage, debug as logDebug } from './lib/logger.mjs';
 import { createShutdown } from './lib/graceful-shutdown.mjs';
 import { generateDueCheck } from './lib/due_check.mjs';
 import { generatePdca } from './lib/pdca.mjs';
+import { normalizeToolName } from './lib/aliases.mjs';
 
 const LOG_MCP = process.env.LOG_MCP === '1' || process.env.LOG_MCP === 'true' || process.env.LOG_MCP === 'yes' || process.env.LOG_MCP === 'on';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -493,8 +494,9 @@ _Text-first sketch_
 }
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { name, arguments: args } = request.params;
-  logMessage('[MCP] Tool call:', name, 'args:', args);
+  const { name: rawName, arguments: args } = request.params;
+  const name = normalizeToolName(rawName);
+  logMessage('[MCP] Tool call:', rawName, '->', name, 'args:', args);
   try {
     let result;
     switch (name) {
