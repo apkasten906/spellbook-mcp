@@ -1,6 +1,6 @@
 # Implement core MCP tools (underscored names)
 
-**Status:** In Progress
+**Status:** Complete
 
 **Goal:** Ship the first usable tool set aligned with `COMMANDS.md` and the Execution Matrix.
 
@@ -30,3 +30,5 @@
 - Added `mcp-starter/lib/pdca.mjs` and `mcp-starter/test/pdca.test.mjs`.
 - Updated `server.js` to call into `generatePdca` helper for `pdca_generate`.
 - Local unit tests (`npm run test:unit` inside `mcp-starter`) run shutdown and pdca tests and are passing locally.
+
+_All core handlers have basic scaffolds and unit tests added. Marking this issue complete._

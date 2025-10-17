@@ -1,21 +1,12 @@
 import path from 'path';
-import assert from 'assert';
+
+import { test, expect } from 'vitest';
 
 import { generateDueCheck } from '../lib/due_check.mjs';
 
-async function testDueCheckBasic() {
+test('due_check generates report and markdown', async () => {
   const promptsRoot = path.resolve(new URL('..', import.meta.url).pathname, '..');
   const { report, md } = await generateDueCheck(promptsRoot, { path: '.', format: 'md' });
-  assert.ok(report.path, 'report.path present');
-  assert.ok(typeof md === 'string' && md.includes('# Due Diligence Report'), 'md generated');
-}
-
-testDueCheckBasic()
-  .then(() => {
-    console.log('ok');
-    process.exit(0);
-  })
-  .catch((e) => {
-    console.error('due_check test failed', e);
-    process.exit(2);
-  });
+  expect(report.path).toBeTruthy();
+  expect(md).toContain('# Due Diligence Report');
+});
