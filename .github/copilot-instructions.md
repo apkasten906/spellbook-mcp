@@ -22,6 +22,24 @@ This file contains concise, actionable notes for an AI coding agent (Copilot-sty
 - File writes: write-variants are planned; use `mcp-starter/lib/git-ops.mjs` helpers (`writeFiles`, `commitAndPush`) if you implement file-write tools. Respect safety: `gitPush` will not push if no remote.
 - Path safety: server uses `assertInside(base, candidate)` to prevent path escape — ensure any file paths are resolved under `promptsRoot` or repo root.
 
+-- Branching & issue association (required)
+- When working on a new GitHub issue always create a dedicated branch and associate the work with that issue. Use a clear branch naming pattern that includes the issue number or a short descriptor (examples below). This helps CI, PRs, and traceability.
+- Preferred branch names:
+	- `feat/25-sdlc-orchestrator`
+	- `fix/42-git-ops-windows`
+	- `chore/issue-123-update-docs`
+- Recommended workflow (PowerShell):
+```powershell
+# create branch from dev (or the designated base branch)
+git checkout dev; git pull
+git checkout -b feat/25-sdlc-orchestrator
+# work, commit locally
+git add <files>; git commit -m "feat(sdlc): add orchestrator prompt (issue-25)"
+git push --set-upstream origin feat/25-sdlc-orchestrator
+```
+
+When opening a PR, link it to the GitHub issue (use the issue number in the PR title/body or the branch name). If you prefer the agent to create the branch/PR for you, include explicit permission in the issue body or a config flag in the task.
+
 4) Build / test / acceptance workflows (concrete)
 - Install and start server locally (PowerShell):
 ```powershell
