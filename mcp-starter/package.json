@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "vitest",
-    "test:unit": "vitest run --threads 1",
+  "test": "vitest",
+  "test:unit": "vitest run",
     "deps:install": "npm install --no-audit --no-fund"
   },
   "dependencies": {
