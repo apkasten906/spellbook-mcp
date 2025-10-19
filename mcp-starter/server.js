@@ -22,6 +22,8 @@ import { generatePdca } from './lib/pdca.mjs';
 import { normalizeToolName } from './lib/aliases.mjs';
 import { jsonSchemaToZod } from './lib/schema-to-zod.mjs';
 import { validateWithZod } from './lib/validate-args.mjs';
+import { commitAndPush } from './lib/git-ops.mjs';
+import { planSdlc } from './lib/sdlc-orchestrator.mjs';
 
 const LOG_MCP =
   process.env.LOG_MCP === '1' ||
@@ -213,6 +215,21 @@ tools.push(
     },
   }
 );
+
+tools.push({
+  name: 'repo_commit',
+  description: 'Write files and optionally commit/push in a repository (safe by default).',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      files: { type: 'array' },
+      branch: { type: 'string' },
+      message: { type: 'string' },
+      push: { type: 'boolean', default: false },
+    },
+    required: ['files'],
+  },
+});
 
 // Handler for initialization (required by MCP protocol)
 server.setRequestHandler(InitializeRequestSchema, async (request) => {
@@ -511,7 +528,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const zschema = jsonSchemaToZod(tool.inputSchema);
       const validation = validateWithZod(zschema, args || {});
       if (!validation.ok) {
-        throw new McpError(ErrorCode.InvalidParams, `Invalid arguments: ${JSON.stringify(validation.errors)}`);
+        throw new McpError(
+          ErrorCode.InvalidParams,
+          `Invalid arguments: ${JSON.stringify(validation.errors)}`
+        );
       }
       // use parsed args
       args = validation.value;
@@ -551,6 +571,71 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'arch_adr':
         result = await handleArchADR(args);
         break;
+      case 'sdlc_orchestrate': {
+        // produce structured plan; optionally write artifacts when write: true
+        const { scope, goal, phases, write = false, branch, message, push = false } = args || {};
+        const plan = planSdlc({ scope, goal, phases, cwd: process.cwd() });
+        if (!write) {
+          return { content: [{ type: 'text', text: JSON.stringify(plan, null, 2) }] };
+        }
+
+        // prepare files for writing
+        const files = [];
+        for (const p of plan.plan || plan) {
+          if (!p.artifact) continue;
+          const pathStr = typeof p.artifact === 'string' ? p.artifact : p.artifact;
+          // read the prompt referenced and use the prompt content as body if available, otherwise a small scaffold
+          let body = `# ${goal || 'artifact'} · ${p.phase}\n\n`;
+          try {
+            const promptPath = path.resolve(promptsRoot, p.prompt || '');
+            body += await fsPromises.readFile(promptPath, 'utf-8');
+          } catch {
+            body += `Generated artifact for ${p.phase}`;
+          }
+          files.push({ path: pathStr, content: body });
+        }
+
+        // commit files safely (no push unless requested)
+        const cwd = process.cwd();
+        const res = commitAndPush(cwd, { files, branch, message: message || `sdlc-orchestrate: ${goal || 'artifact'}`, push });
+        const pushed = Boolean(res?.push?.pushed);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({ plan, commit: { pushed, details: res?.push || null } }, null, 2),
+            },
+          ],
+        };
+      }
+      case 'repo_commit': {
+        // safe repo commit: write files, commit, optionally push when remote present and push flag true
+        const cwd = process.cwd();
+        const _res = commitAndPush(cwd, {
+          files: args.files || [],
+          branch: args.branch,
+          message: args.message || 'mcp commit',
+        });
+        const pushed = Boolean(_res?.push?.pushed);
+        if (args.push && !_res?.push?.pushed) {
+          if (_res?.push?.reason === 'no-remote') {
+            return {
+              content: [
+                { type: 'text', text: 'Committed locally. No remote configured; not pushed.' },
+              ],
+            };
+          }
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Committed locally. Push attempted but failed: ${_res?.push?.error || 'unknown'}`,
+              },
+            ],
+          };
+        }
+        return { content: [{ type: 'text', text: `Committed${pushed ? ' and pushed' : ''}` }] };
+      }
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
     }

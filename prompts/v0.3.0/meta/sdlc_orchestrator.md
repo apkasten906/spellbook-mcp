@@ -4,7 +4,6 @@ Purpose: Orchestrate the SDLC phases and recommend which per-phase prompts/tools
 what artifacts to produce, and where to write them.
 -->
 
-
 # SDLC Orchestrator
 
 You are an SDLC Orchestrator assistant. Given a short `goal` and `scope`, produce a per-phase plan that lists:

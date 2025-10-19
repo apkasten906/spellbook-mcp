@@ -1,5 +1,6 @@
 import { test, expect } from 'vitest';
 import { z } from 'zod';
+
 import { validateWithZod } from '../lib/validate-args.mjs';
 
 test('validateWithZod accepts valid data', () => {

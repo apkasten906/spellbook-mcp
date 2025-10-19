@@ -17,7 +17,9 @@ export function writeFiles(cwd, files = []) {
 
 export function hasGitRepo(cwd) {
   try {
-    const out = execSync('git rev-parse --is-inside-work-tree', { cwd, stdio: 'pipe' }).toString().trim();
+    const out = execSync('git rev-parse --is-inside-work-tree', { cwd, stdio: 'pipe' })
+      .toString()
+      .trim();
     return out === 'true';
   } catch {
     return false;

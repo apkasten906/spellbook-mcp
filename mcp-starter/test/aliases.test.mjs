@@ -1,4 +1,5 @@
 import { test, expect } from 'vitest';
+
 import { normalizeToolName } from '../lib/aliases.mjs';
 
 test('normalize known dotted alias', () => {

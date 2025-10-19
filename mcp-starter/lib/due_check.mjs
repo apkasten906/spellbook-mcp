@@ -1,4 +1,5 @@
 import path from 'path';
+
 import fg from 'fast-glob';
 
 export async function generateDueCheck(promptsRoot, args = {}) {

@@ -22,14 +22,12 @@ We implemented alias normalization and input validation as follows:
 ## Usage examples
 
 - Calling with a dotted alias:
-
-	- Request name: `prompt.read`
-	- Server resolves to `prompt_read` via `normalizeToolName`.
+  - Request name: `prompt.read`
+  - Server resolves to `prompt_read` via `normalizeToolName`.
 
 - Validation failure example (missing required):
-
-	- Request: `pdca_generate` without `phase` or `artifact`.
-	- Response: MCP `InvalidParams` with details: `[{ path: ['phase'], message: 'Required', ... }, ...]`
+  - Request: `pdca_generate` without `phase` or `artifact`.
+  - Response: MCP `InvalidParams` with details: `[{ path: ['phase'], message: 'Required', ... }, ...]`
 
 ## Notes
 
