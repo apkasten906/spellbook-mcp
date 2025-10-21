@@ -27,16 +27,19 @@ We use a deterministic, reproducible naming pattern for artifacts to make them e
 `docs/<SUBFOLDER>/<goal-slug>-<phase>.<ext>`
 
 Rules & examples:
+
 - `goal-slug` is the goal lowercased and slugified (spaces -> `-`, non-alphanumerics removed, truncated to 64 chars).
 - `phase` is the canonical phase name (e.g., `requirements`, `architecture`, `testing`).
 - Extension depends on artifact type (`.md` for markdown, `.yaml` for CI files, etc.).
 
 Examples:
+
 - `docs/PDCA/example-service-requirements.md`
 - `docs/ADR/example-service-architecture.md`
 - `docs/TESTS/example-service-testing.md`
 
 Notes:
+
 - Filenames do NOT include git SHAs, timestamps, or random tokens. This is intentional: artifacts should be predictable.
 - Avoid write collisions by design: callers can inspect the file system or consult VCS history before persisting; the server will not auto-push unless explicitly requested.
 
@@ -48,6 +51,7 @@ Writing artifacts is opt-in. If you pass `write: true` to `sdlc_orchestrate` the
 - `write: true` — server will prepare files and call `repo_commit` with `push: false` by default. The server will only attempt to push if the caller passes an explicit `push: true` and a remote is configured.
 
 Security & safety:
+
 - Commits are local by default; push must be explicit.
 - The `repo_commit` helper validates paths to remain inside the repository and refuses to write outside safe boundaries.
 

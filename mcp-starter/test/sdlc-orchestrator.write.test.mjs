@@ -29,7 +29,10 @@ test('sdlc write flow creates files and commits locally', () => {
     const dir = path.dirname(artifactPath);
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(artifactPath, `# ${goal} - ${p.phase}\n`);
-    files.push({ path: path.relative(cwd, artifactPath), content: fs.readFileSync(artifactPath, 'utf-8') });
+    files.push({
+      path: path.relative(cwd, artifactPath),
+      content: fs.readFileSync(artifactPath, 'utf-8'),
+    });
   }
   commitAndPush(cwd, { files, branch: 'test/sdlc', message: 'test commit', push: false });
   // assert files exist

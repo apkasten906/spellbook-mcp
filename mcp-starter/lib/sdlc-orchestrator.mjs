@@ -10,7 +10,10 @@ function slugify(input) {
 
 function getGitShortSha(cwd = process.cwd()) {
   try {
-    const out = execSync('git rev-parse --short HEAD', { cwd, stdio: ['ignore', 'pipe', 'ignore'] });
+    const out = execSync('git rev-parse --short HEAD', {
+      cwd,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
     return String(out).trim();
   } catch {
     return null;
@@ -21,7 +24,12 @@ function isoNow() {
   return new Date().toISOString().replace(/[:.]/g, '').slice(0, 15) + 'Z';
 }
 
-export function planSdlc({ scope = 'feature', goal = '', phases = null, cwd = process.cwd() } = {}) {
+export function planSdlc({
+  scope = 'feature',
+  goal = '',
+  phases = null,
+  cwd = process.cwd(),
+} = {}) {
   const allPhases = [
     'requirements',
     'analysis',
@@ -39,7 +47,7 @@ export function planSdlc({ scope = 'feature', goal = '', phases = null, cwd = pr
       case 'requirements':
         return {
           phase: 'requirements',
-          prompt: 'prompts/v0.3.0/1_requirements_planning.md',
+          prompt: 'prompts/v0.3.0/sdlc_phases/1_requirements_planning.md',
           toolCalls: [
             { tool: 'pdca_generate', args: { phase: 'plan', artifact: `${goal || 'work'} PDCA` } },
           ],
@@ -48,7 +56,7 @@ export function planSdlc({ scope = 'feature', goal = '', phases = null, cwd = pr
       case 'analysis':
         return {
           phase: 'analysis',
-          prompt: 'prompts/v0.3.0/2_analysis_specification.md',
+          prompt: 'prompts/v0.3.0/sdlc_phases/2_analysis_specification.md',
           toolCalls: [
             { tool: 'prompt_read', args: { file: 'prompts/v0.3.0/2_analysis_specification.md' } },
           ],
@@ -57,35 +65,35 @@ export function planSdlc({ scope = 'feature', goal = '', phases = null, cwd = pr
       case 'architecture':
         return {
           phase: 'architecture',
-          prompt: 'prompts/v0.3.0/3_architecture_design.md',
+          prompt: 'prompts/v0.3.0/sdlc_phases/3_architecture_design.md',
           toolCalls: [{ tool: 'api_scaffold', args: { name: goal || 'service' } }],
           artifact: `docs/ADR/${goalSlug}-${p}.md`,
         };
       case 'implementation':
         return {
           phase: 'implementation',
-          prompt: 'prompts/v0.3.0/4_implementation_development.md',
+          prompt: 'prompts/v0.3.0/sdlc_phases/4_implementation_development.md',
           toolCalls: [],
           artifact: null,
         };
       case 'testing':
         return {
           phase: 'testing',
-          prompt: 'prompts/v0.3.0/5_testing_quality_assurance.md',
+          prompt: 'prompts/v0.3.0/sdlc_phases/5_testing_quality_assurance.md',
           toolCalls: [{ tool: 'tests_plan', args: { scope: 'file', target: 'server.js' } }],
           artifact: `docs/TESTS/${goalSlug}-${p}.md`,
         };
       case 'deployment':
         return {
           phase: 'deployment',
-          prompt: 'prompts/v0.3.0/6_deployment_release.md',
+          prompt: 'prompts/v0.3.0/sdlc_phases/6_deployment_release.md',
           toolCalls: [{ tool: 'ci_configure', args: { service: 'github', env: 'dev' } }],
           artifact: `docs/CI/${goalSlug}-${p}.yaml`,
         };
       case 'maintenance':
         return {
           phase: 'maintenance',
-          prompt: 'prompts/v0.3.0/7_maintenance_monitoring.md',
+          prompt: 'prompts/v0.3.0/sdlc_phases/7_maintenance_monitoring.md',
           toolCalls: [{ tool: 'due_check', args: { path: '.', strict: false } }],
           artifact: `docs/RCA/${goalSlug}-${p}.md`,
         };

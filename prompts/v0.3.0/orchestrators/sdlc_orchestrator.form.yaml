@@ -1,0 +1,36 @@
+title: SDLC Orchestrator form
+description: Inputs required to run sdlc_orchestrate
+schemaVersion: 1
+fields:
+  - name: scope
+    type: string
+    enum: [feature, service, repo]
+    default: feature
+    prompt: "Scope (feature|service|repo)"
+  - name: goal
+    type: string
+    prompt: "Goal (human-friendly name)"
+    required: true
+  - name: phases
+    type: array
+    itemType: string
+    prompt: "Phases (comma-separated) or leave blank for full lifecycle"
+  - name: write
+    type: boolean
+    default: false
+    prompt: "Write artifacts? (true/false)"
+  - name: out
+    type: string
+    default: "__output_sample"
+    prompt: "Output folder for artifacts"
+  - name: branch
+    type: string
+    prompt: "Branch to commit to (optional)"
+  - name: message
+    type: string
+    default: "sdlc-orchestrate: {{goal}}"
+    prompt: "Commit message"
+  - name: push
+    type: boolean
+    default: false
+    prompt: "Push after commit? (true/false)"
