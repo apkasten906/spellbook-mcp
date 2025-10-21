@@ -1,65 +1,149 @@
 {
-  "generated_at": "2025-10-12T22:10:15.508459Z",
+  "generated_at": "2025-10-20T00:00:00.000000Z",
+  "schemaVersion": "1.0.0",
   "items": [
     {
-      "file": "prompts/v0.3.0/1_requirements_planning.md",
+      "id": "requirements_planning",
+      "file": "prompts/v0.3.0/sdlc_phases/1_requirements_planning.md",
       "version": "0.3.0",
-      "tags": ["plan", "pm", "requirements"]
+      "title": "Requirements Planning",
+      "description": "Guided template for capturing requirements and acceptance criteria.",
+      "phase": "requirements",
+      "intent": "planning",
+      "tags": ["plan", "pm", "requirements"],
+      "examples": []
     },
     {
-      "file": "prompts/v0.3.0/2_analysis_specification.md",
+      "id": "analysis_specification",
+      "file": "prompts/v0.3.0/sdlc_phases/2_analysis_specification.md",
       "version": "0.3.0",
-      "tags": ["analysis", "api", "schema", "spec"]
+      "title": "Analysis & Specification",
+      "description": "Template to drive analysis and specification for features/APIs.",
+      "phase": "analysis",
+      "intent": "spec",
+      "tags": ["analysis", "api", "schema", "spec"],
+      "examples": []
     },
     {
-      "file": "prompts/v0.3.0/3_architecture_design.md",
+      "id": "architecture_design",
+      "file": "prompts/v0.3.0/sdlc_phases/3_architecture_design.md",
       "version": "0.3.0",
-      "tags": ["architecture", "c4", "design", "nfr"]
+      "title": "Architecture Design",
+      "description": "Architecture design template (ADR, diagrams, tradeoffs).",
+      "phase": "architecture",
+      "intent": "design",
+      "tags": ["architecture", "c4", "design", "nfr"],
+      "examples": []
     },
     {
-      "file": "prompts/v0.3.0/4_implementation_development.md",
+      "id": "implementation_development",
+      "file": "prompts/v0.3.0/sdlc_phases/4_implementation_development.md",
       "version": "0.3.0",
-      "tags": ["code", "impl", "refactor"]
+      "title": "Implementation & Development",
+      "description": "Guidance for implementation tasks and developer notes.",
+      "phase": "implementation",
+      "intent": "development",
+      "tags": ["code", "impl", "refactor"],
+      "examples": []
     },
     {
-      "file": "prompts/v0.3.0/5_testing_quality_assurance.md",
+      "id": "testing_quality_assurance",
+      "file": "prompts/v0.3.0/sdlc_phases/5_testing_quality_assurance.md",
       "version": "0.3.0",
-      "tags": ["e2e", "qa", "test", "unit"]
+      "title": "Testing & Quality Assurance",
+      "description": "Checklist and templates for testing plans and QA.",
+      "phase": "testing",
+      "intent": "testing",
+      "tags": ["e2e", "qa", "test", "unit"],
+      "examples": []
     },
     {
-      "file": "prompts/v0.3.0/6_deployment_release.md",
+      "id": "deployment_release",
+      "file": "prompts/v0.3.0/sdlc_phases/6_deployment_release.md",
       "version": "0.3.0",
-      "tags": ["cicd", "deploy", "iac", "terraform"]
+      "title": "Deployment & Release",
+      "description": "Release checklist and CI/CD guidance.",
+      "phase": "deployment",
+      "intent": "release",
+      "tags": ["cicd", "deploy", "iac", "terraform"],
+      "examples": []
     },
     {
-      "file": "prompts/v0.3.0/7_maintenance_monitoring.md",
+      "id": "maintenance_monitoring",
+      "file": "prompts/v0.3.0/sdlc_phases/7_maintenance_monitoring.md",
       "version": "0.3.0",
-      "tags": ["logs", "monitor", "rca"]
+      "title": "Maintenance & Monitoring",
+      "description": "Guidance for monitoring, alerts, and maintenance tasks.",
+      "phase": "maintenance",
+      "intent": "ops",
+      "tags": ["logs", "monitor", "rca"],
+      "examples": []
     },
     {
+      "id": "meta_pdca_cycle",
       "file": "prompts/v0.3.0/meta/PDCA_cycle.md",
       "version": "0.3.0",
-      "tags": ["meta", "pdca", "process"]
+      "title": "PDCA Cycle",
+      "description": "Deming PDCA cycle guidance and templates.",
+      "phase": "meta",
+      "intent": "process",
+      "tags": ["meta", "pdca", "process"],
+      "examples": []
     },
     {
+      "id": "meta_due_diligence",
       "file": "prompts/v0.3.0/meta/due_diligence_checklist.md",
       "version": "0.3.0",
-      "tags": ["meta", "pdca", "process"]
+      "title": "Due Diligence Checklist",
+      "description": "Checklist for SDLC due-diligence and readiness.",
+      "phase": "meta",
+      "intent": "due_check",
+      "tags": ["meta", "pdca", "process"],
+      "examples": []
     },
     {
+      "id": "meta_retrospective_review",
       "file": "prompts/v0.3.0/meta/retrospective_review.md",
       "version": "0.3.0",
-      "tags": ["meta", "pdca", "process"]
+      "title": "Retrospective Review",
+      "description": "Template for retrospective reviews and action items.",
+      "phase": "meta",
+      "intent": "retro",
+      "tags": ["meta", "pdca", "process"],
+      "examples": []
     },
     {
+      "id": "meta_error_learning_protocol",
       "file": "prompts/v0.3.0/meta/error_learning_protocol.md",
       "version": "0.3.0",
-      "tags": ["meta", "pdca", "process"]
+      "title": "Error Learning Protocol",
+      "description": "Protocol for learning from errors and postmortems.",
+      "phase": "meta",
+      "intent": "learning",
+      "tags": ["meta", "pdca", "process"],
+      "examples": []
     },
     {
+      "id": "meta_continuous_improvement_tracker",
       "file": "prompts/v0.3.0/meta/continuous_improvement_tracker.md",
       "version": "0.3.0",
-      "tags": ["meta", "pdca", "process"]
+      "title": "Continuous Improvement Tracker",
+      "description": "Tracker for continuous improvement items and owners.",
+      "phase": "meta",
+      "intent": "tracking",
+      "tags": ["meta", "pdca", "process"],
+      "examples": []
+    },
+    {
+      "id": "sdlc_orchestrator",
+      "file": "prompts/v0.3.0/sdlc_orchestrator.md",
+      "version": "0.3.0",
+      "title": "SDLC Orchestrator",
+      "description": "Run the SDLC orchestrator to generate per-phase artifacts and guide the workflow.",
+      "phase": "orchestrator",
+      "intent": "workflow",
+      "tags": ["orchestrator", "sdlc", "workflow"],
+      "examples": []
     }
   ]
 }
