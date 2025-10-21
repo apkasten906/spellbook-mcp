@@ -13,7 +13,7 @@ import {
   ListToolsRequestSchema,
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
-import fg from 'fast-glob';
+// fast-glob was used in earlier implementations; current handlers use prompt.catalog.json
 
 import { info as logMessage, debug as logDebug } from './lib/logger.mjs';
 import { createShutdown } from './lib/graceful-shutdown.mjs';
@@ -214,6 +214,23 @@ tools.push(
       required: ['system'],
     },
   }
+  ,
+  {
+    name: 'sdlc_orchestrate',
+    description: 'Produce an SDLC plan and optionally write per-phase artifacts (safe by default).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        scope: { type: 'string', enum: ['feature', 'service', 'repo'], default: 'feature' },
+        goal: { type: 'string' },
+        phases: { type: 'array', items: { type: 'string' } },
+        write: { type: 'boolean', default: false },
+        branch: { type: 'string' },
+        message: { type: 'string' },
+        push: { type: 'boolean', default: false },
+      },
+    },
+  }
 );
 
 tools.push({
@@ -222,7 +239,17 @@ tools.push({
   inputSchema: {
     type: 'object',
     properties: {
-      files: { type: 'array' },
+      files: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            path: { type: 'string' },
+            content: { type: 'string' },
+          },
+          required: ['path', 'content'],
+        },
+      },
       branch: { type: 'string' },
       message: { type: 'string' },
       push: { type: 'boolean', default: false },
@@ -264,8 +291,18 @@ async function handlePromptRead(args = {}) {
   assertInside(promptsRoot, abs);
   try {
     const content = await fsPromises.readFile(abs, 'utf-8');
+    // try to find metadata in prompt.catalog.json
+    let meta = null;
+    try {
+      const catalog = JSON.parse(
+        await fsPromises.readFile(path.resolve(promptsRoot, '..', 'prompt.catalog.json'), 'utf-8')
+      );
+      meta = (catalog.items || []).find((it) => it.file === file) || null;
+    } catch {
+      /* ignore */
+    }
     return {
-      content: [{ type: 'text', text: content }],
+      content: [{ type: 'application/json', text: JSON.stringify({ meta, content }) }],
     };
   } catch (error) {
     if (error && error.code === 'ENOENT') {
@@ -279,27 +316,41 @@ async function handlePromptRead(args = {}) {
 }
 
 async function handlePromptList(args = {}) {
-  const { base = '.' } = args;
-  const baseAbs = path.resolve(promptsRoot, base);
-  assertInside(promptsRoot, baseAbs);
+  const { tag, phase, q, page = 1, perPage = 50 } = args || {};
   try {
-    const files = await fg(['**/*.md'], {
-      cwd: baseAbs,
-      dot: false,
-      ignore: ['**/node_modules/**', '**/.git/**', '**/dist/**'],
-      absolute: false,
-      followSymbolicLinks: false,
-    });
-    return {
-      content: [{ type: 'text', text: files.join('\n') }],
-    };
-  } catch (error) {
-    if (error && error.code === 'ENOENT') {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        `File not found: ${typeof base === 'string' ? base : JSON.stringify(base)}`
+    const catalog = JSON.parse(
+      await fsPromises.readFile(path.resolve(promptsRoot, '..', 'prompt.catalog.json'), 'utf-8')
+    );
+    let items = (catalog.items || []).slice();
+    if (tag) {
+      items = items.filter((it) => Array.isArray(it.tags) && it.tags.includes(tag));
+    }
+    if (phase) {
+      items = items.filter((it) => it.phase === phase);
+    }
+    if (q) {
+      const qq = String(q).toLowerCase();
+      items = items.filter(
+        (it) =>
+          (it.title || '').toLowerCase().includes(qq) ||
+          (it.description || '').toLowerCase().includes(qq) ||
+          (it.tags || []).join(' ').includes(qq)
       );
     }
+    const total = items.length;
+    const pageNum = Math.max(1, Number(page) || 1);
+    const size = Math.max(1, Math.min(200, Number(perPage) || 50));
+    const start = (pageNum - 1) * size;
+    const pageItems = items.slice(start, start + size);
+    return {
+      content: [
+        {
+          type: 'application/json',
+          text: JSON.stringify({ total, page: pageNum, perPage: size, items: pageItems }, null, 2),
+        },
+      ],
+    };
+  } catch (error) {
     throw new McpError(ErrorCode.InternalError, String(error?.message ?? error));
   }
 }
@@ -574,6 +625,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'sdlc_orchestrate': {
         // produce structured plan; optionally write artifacts when write: true
         const { scope, goal, phases, write = false, branch, message, push = false } = args || {};
+
+        // If no args provided or no goal specified, return the interactive form YAML so clients
+        // can present a form and collect inputs before calling the tool again.
+        if (!args || !goal) {
+          try {
+            const formRel = 'prompts/v0.3.0/orchestrators/sdlc_orchestrator.form.yaml';
+            const formPath = path.resolve(promptsRoot, formRel);
+            assertInside(promptsRoot, formPath);
+            const formText = await fsPromises.readFile(formPath, 'utf-8');
+            return {
+              content: [
+                {
+                  type: 'application/json',
+                  text: JSON.stringify({ form: formText, file: formRel }),
+                },
+              ],
+            };
+          } catch (err) {
+            throw new McpError(ErrorCode.InternalError, `Failed to load form: ${String(err?.message ?? err)}`);
+          }
+        }
+
         const plan = planSdlc({ scope, goal, phases, cwd: process.cwd() });
         if (!write) {
           return { content: [{ type: 'text', text: JSON.stringify(plan, null, 2) }] };
@@ -597,13 +670,22 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         // commit files safely (no push unless requested)
         const cwd = process.cwd();
-        const res = commitAndPush(cwd, { files, branch, message: message || `sdlc-orchestrate: ${goal || 'artifact'}`, push });
+        const res = commitAndPush(cwd, {
+          files,
+          branch,
+          message: message || `sdlc-orchestrate: ${goal || 'artifact'}`,
+          push,
+        });
         const pushed = Boolean(res?.push?.pushed);
         return {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({ plan, commit: { pushed, details: res?.push || null } }, null, 2),
+              text: JSON.stringify(
+                { plan, commit: { pushed, details: res?.push || null } },
+                null,
+                2
+              ),
             },
           ],
         };

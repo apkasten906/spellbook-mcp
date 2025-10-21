@@ -144,6 +144,21 @@
       "intent": "workflow",
       "tags": ["orchestrator", "sdlc", "workflow"],
       "examples": []
+    },
+    {
+      "id": "sdlc_quick_start",
+      "file": "prompts/v0.3.0/orchestrators/sdlc_quick_start.md",
+      "version": "0.3.0",
+      "title": "SDLC Quick Start",
+      "description": "Natural language guide for running the SDLC orchestrator - just describe your goal!",
+      "phase": "orchestrator",
+      "intent": "quick-start",
+      "tags": ["orchestrator", "sdlc", "workflow", "quick-start", "ux"],
+      "examples": [
+        "Run SDLC orchestrator for: Add async retry to client",
+        "Generate SDLC plan for my feature: User authentication",
+        "Plan the full lifecycle for: Payment processing API"
+      ]
     }
   ]
 }
